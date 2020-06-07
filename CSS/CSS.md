@@ -228,3 +228,97 @@ by commas.
   background-repeat: no-repeat, repeat;
 }
 ```
+
+## Thinking Inside the Box
+
+### box-sizing
+
+_Values:_ content-box | border-box  
+_Default:_ content-box  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+Using the content box model, the width and height values are applied to the content area only. The other way to specify the size of an element is to apply width and height dimensions to the entire visible box, including the padding and border.
+
+Content-box
+
+![alt text](images/content-box.png "Content box")
+
+Border-box
+![alt text](images/border-box.png "Border box")
+
+### overflow
+
+_Values:_ visible | hidden | scroll | auto | inherit  
+_Default:_ visible  
+_Applies to:_ block-level elements and replaced inline elements (such as images)  
+_Inherits:_ no
+
+When an element is set to a size that is too small for its contents, it is pos-
+sible to specify what to do with the content that doesn’t fit, using the over-
+flow property.
+
+**_visible_**  
+The default value is visible , which allows the content to hang out over
+the element box so that it all can be seen.  
+**_hidden_**  
+When overflow is set to hidden , the content that does not fit gets clipped
+off and does not appear beyond the edges of the element’s content area.  
+**_scroll_**  
+When scroll is specified, scrollbars are added to the element box to let
+users scroll through the content. Be aware that when you set the value to
+scroll , the scrollbars will always be there, even if the content fits in the
+specified height just fine.  
+**_auto_**  
+The auto value allows the browser to decide how to handle overflow. In
+most cases, scrollbars are added only when the content doesn’t fit and
+they are needed.
+
+## Margins
+
+### Collapsing margins
+
+Using the two paragraphs from the previous figure as an example, if the top
+element has a bottom margin of 4 ems, and the following element has a top
+margin of 2 ems, the resulting margin space between elements does not add
+up to 6 ems. Rather, the margins collapse and the resulting margin between
+the paragraphs will be 4 ems, the largest specified value.
+
+### Margins on inline elements
+
+You can apply top and bottom margins to inline text elements (or “non-
+replaced inline elements,” to use the proper CSS terminology), but it won’t
+add vertical space above and below the element, and the height of the line
+will not change. However, when you apply left and right margins to inline
+text elements, margin space will be held clear before and after the text in the
+flow of the element, even if that element breaks over several lines.
+
+## Display
+
+The display property defines the type of element box an element generates
+in the layout.
+
+_Values:_ inline | block | list-item | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row |
+table-column-group | table-column | table-cell | table-caption | none
+The following are new in CSS3: run-in | compact | ruby | ruby-base | ruby-text |
+ruby-base-container | ruby-text-container  
+_Default:_ inline  
+_Applies to:_ all elements  
+_Inherits:_ yes
+
+**_inline_**  
+The default value for elements. Think of elements like `<span>`, `<em>`, or `<b>` and how wrapping text in those elements within a string of text doesn’t break the flow of the text.
+
+![alt text](images/inline-element.png "Content box")
+
+The `<em>` element has a 1px red border. Notice it sits right inline with the rest of the text.
+
+An inline element will accept margin and padding, but the element still sits inline as you might expect. Margin and padding will only push other elements horizontally away, not vertically.
+
+An inline element will not accept height and width. It will just ignore it.
+
+**_inline block_**  
+An element set to inline-block is very similar to inline in that it will set inline with the natural flow of text (on the “baseline”). The difference is that you are able to set a width and height which will be respected.
+
+**_block_**  
+The element generates a block element box, generating line breaks both before and after the element when in the normal flow. A number of elements are set to block by the browser UA stylesheet. They are usually container elements, like `<div>`, `<section>`, and `<ul>`. Also text “blocks” like `<p>` and `<h1>`. Block level elements do not sit inline but break past them. By default (without setting a width) they take up as much horizontal space as they can.
