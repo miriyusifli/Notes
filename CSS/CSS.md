@@ -28,6 +28,23 @@ Style information can come from various sources, listed here from general to spe
 -   Contextual selectors, which are more specific than (and will override)
 -   Individual element selectors
 
+## Pseudo-classes
+
+### Link pseudo-classes
+
+_:link_ Applies a style to unclicked (unvisited) links  
+_:visited_ Applies a style to links that have already been clicked
+
+### User action pseudo-classes
+
+_:focus_ Applies when the element is selected and ready for input  
+_:hover_ Applies when the mouse pointer is over the element  
+_:active_ Applies when the element (such a link or button) is in the process of being clicked or tapped
+
+### More Pseudo-classes
+
+_:root_ | _:only-child_ | _:nth-child()_ | _:empty_ | _:first-of-type_ | _:nth-last-child()_ | _:first-child_ | _:last-of-type_ | _:nth-of-type()_ | _:last-child_ | _:only-of-type_ | _:nth-last-of-type()_
+
 ## Font and Text Properties
 
 ### font-family
@@ -100,7 +117,7 @@ The list-style-position property allows you to pull the bullet inside the conten
 _Values:_ url | none | inherit  
 _Default:_ none  
 _Applies to:_ ul , ol , and li (or elements whose display value is list-item )  
-*Inherits:*yes
+_Inherits:_ yes
 
 You can also use your own image as a bullet using the list-style-image property.
 
@@ -125,3 +142,89 @@ You can also use your own image as a bullet using the list-style-image property.
 | vertical-align  | Adjusts the vertical position of inline elements relative to the baseline |
 | white-space     | How whitespace in the source is displayed                                 |
 | word-spacing    | Inserts space between words                                               |
+
+## Colors and Backgrounds
+
+### color
+
+_Values:_ color value (name or numeric) | inherit  
+_Default:_ depends on the browser and user’s preferences  
+_Applies to:_ all elements  
+*Inherits:*yes
+
+### background-color
+
+_Values:_ color value (name or numeric) | transparent | inherit  
+_Default:_ transparent  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+### opacity
+
+_Values:_ number (0 to 1)  
+_Default:_ 1  
+_Applies to:_ all elements
+_Inherits:_ no
+
+### background-image
+
+_Values:_ url (location of image) | none | inherit  
+_Default:_ none  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+The image starts in the top lefthand corner and tiles horizontally and vertically until the entire element is filled. (although you’ll learn how to change that in a moment)
+
+### background-repeat
+
+_Values:_ repeat | repeat-x | repeat-y | no-repeat | inherit  
+_Default:_ repeat  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+### background-position
+
+_Values:_ length measurement | percentage | left | center | right | top | bottom | inherit  
+_Default:_ 0% 0% (same as left top )  
+_Applies to:_ all elements  
+*Inherits:*no
+
+The background-position property specifies the position of the origin image
+in the background. You can think of the origin image as the first image that
+is placed in the background from which tiling images extend. Here is the
+property and its various values.
+
+### background-attachment
+
+_Values:_ scroll | fixed | local (new in CSS3) | inherit  
+_Default:_ scroll  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+**_fixed_**  
+The background is fixed relative to the viewport. Even if an element has a scrolling mechanism, the background doesn't move with the element. (This is not compatible with background-clip: text.)  
+**_local_**  
+The background is fixed relative to the element's contents. If the element has a scrolling mechanism, the background scrolls with the element's contents, and the background painting area and background positioning area are relative to the scrollable area of the element rather than to the border framing them.  
+**_scroll_**  
+The background is fixed relative to the element itself and does not scroll with its contents. (It is effectively attached to the element's border.)
+
+### The Shorthand background Property
+
+_Values:_ background-color background-image background-repeat background-
+attachment background-position | inherit  
+_Default:_ see indiviual properties  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+### Multiple backgrounds
+
+To apply multiple values for background-image , put them in a list separated
+by commas.
+
+```
+#example1 {
+  background-image: url(img_flwr.gif), url(paper.gif);
+  background-position: right bottom, left top;
+  background-repeat: no-repeat, repeat;
+}
+```
