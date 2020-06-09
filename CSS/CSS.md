@@ -1,7 +1,5 @@
 # CSS Notes
 
-**This notes are based on _Learning Web Design(4th Edition)_ book by Jennifer Niederst Robbins**
-
 ## General
 
 Generally speaking, the closer the style sheet is to the content, the more weight it is given. Embedded style sheets that appear right in the document in the style element have more weight than external style sheets. Inline styles have more weight than embedded style sheets.
@@ -32,14 +30,14 @@ Style information can come from various sources, listed here from general to spe
 
 ### Link pseudo-classes
 
-_:link_ Applies a style to unclicked (unvisited) links  
-_:visited_ Applies a style to links that have already been clicked
+_:link_: Applies a style to unclicked (unvisited) links  
+_:visited_: Applies a style to links that have already been clicked
 
 ### User action pseudo-classes
 
-_:focus_ Applies when the element is selected and ready for input  
-_:hover_ Applies when the mouse pointer is over the element  
-_:active_ Applies when the element (such a link or button) is in the process of being clicked or tapped
+_:focus_: Applies when the element is selected and ready for input  
+_:hover_: Applies when the mouse pointer is over the element  
+_:active_: Applies when the element (such a link or button) is in the process of being clicked or tapped
 
 ### More Pseudo-classes
 
@@ -322,3 +320,88 @@ An element set to inline-block is very similar to inline in that it will set inl
 
 **_block_**  
 The element generates a block element box, generating line breaks both before and after the element when in the normal flow. A number of elements are set to block by the browser UA stylesheet. They are usually container elements, like `<div>`, `<section>`, and `<ul>`. Also text “blocks” like `<p>` and `<h1>`. Block level elements do not sit inline but break past them. By default (without setting a width) they take up as much horizontal space as they can.
+
+### CSS Review: Basic Box Properties
+
+| Property             | Description                                                                              |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| border               | A shorthand property that combines border properties                                     |
+| border-color         | Shorthand property for specifying the color of borders                                   |
+| border-image (CSS3)  | Adds an image inside the border area                                                     |
+| border-radius (CSS3) | Shorthand property for rounding the corners of the visible element box                   |
+| border-style         | Shorthand property for specifying the style of borders                                   |
+| border-width         | Shorthand property for specifying the width of borders                                   |
+| box-sizing           | Specifies whether width and height dimensions apply to the content box or the border box |
+| box-shadow (CSS3)    | Adds a drop shadow around the visible element box                                        |
+| display              | Defines the type of element box an element generates                                     |
+| height               | Specifies the height of the element’s content area                                       |
+| width                | Specifies the width of an element’s content area                                         |
+| margin               | Shorthand property for specifying margin space around an element                         |
+| max-height           | Specifies the maximum height of an element                                               |
+| max-width            | Specifies the maximum width of an element                                                |
+| min-height           | Specifies the minimum height of an element                                               |
+| min-width            | Specifies the minimum width of an element                                                |
+| overflow             | How to handle content that doesn’t fit in the content area                               |
+| padding              | Shorthand property for specifying space between the content area and the border          |
+
+## Positioning Basics
+
+### position
+
+_Values:_ static | relative | absolute | fixed | inherit  
+_Default:_ static  
+_Applies to:_ all elements  
+_Inherits:_ no
+
+**_static_**  
+This is the normal positioning scheme in which elements are positioned
+as they occur in the normal document flow.
+
+**_relative_**  
+Relative positioning moves the box relative to its original position in the
+flow. The distinctive behavior of relative positioning is that the space
+the element would have occupied in the normal flow is preserved as an
+empty space.
+
+**Important Notes:**
+
+1. The original space in the document flow is preserved.
+2. Overlap happens.Because this is a positioned element, it can potentially overlap other ele-
+   ments
+
+**_absolute_**  
+Absolutely positioned elements are removed from the document flow
+entirely and positioned with respect to the browser window or a contain-
+ing element (we’ll talk more about this later). Unlike relatively positioned
+elements, the space they would have occupied is closed up. In fact, they
+have no influence at all on the layout of surrounding elements.
+
+**_fixed_**  
+The distinguishing characteristic of fixed positioning is that the element
+stays in one position in the window even when the document scrolls.
+Fixed elements are removed from the document flow and positioned
+relative to the browser window (or other viewport) rather than another
+element in the document. It currently causes some hiccups on mobile
+devices, as discussed later in this chapter.
+
+### Containing blocks
+
+-   If the positioned element is not contained within another positioned ele-
+    ment, then it will be placed relative to the initial containing block (cre-
+    ated by the html element).
+-   But if the element has an ancestor (i.e., is contained within an element)
+    that has its position set to relative , absolute , or fixed , the element will
+    be positioned relative to the edges of that element instead.
+
+Let’s deliberately turn the element into a containing block and see what
+happens. All we have to do is apply the `position` property to it; we don’t
+have to actually move it. The most common way to make an element into a
+containing block is to set the `position` to `relative` , but don’t move it with
+offset values.
+
+### top, right, bottom, left
+
+_Values:_ length measurement | percentage | auto | inherit  
+_Default:_ auto  
+_Applies to:_ positioned elements (where position value is relative , absolute , or fixed )  
+_Inherits:_ no
