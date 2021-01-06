@@ -30,3 +30,12 @@ Let's look at some examples how this rule will be applied to the following URLs.
 /test/bye -> /bye
 /test/login -> /login
 ```
+
+##### flag
+3 flags can be used with rewrite directive.
+1. last -  means if the rewrite condition equals true then rewrite the requested uri and jump to the location block that fits the newly rewritten uri.
+2. break -  means if the rewrite condition equals true then rewrite the requested uri **BUT DO NOT JUMP**, instead stay in the same location block and continue to the next line inside the block
+3. permanent - It is similar to last, but changes URL in the browser permanently and returns a permanent redirect with the 301 code.
+
+
+
