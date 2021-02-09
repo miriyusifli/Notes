@@ -52,3 +52,18 @@ The most robust way to defend against CSRF attacks is to include a CSRF token wi
 - Unpredictable with high entropy, as for session tokens in general.
 - Tied to the user's session.
 - Strictly validated in every case before the relevant action is executed.
+
+### Host Header Injection Attack
+
+#### Password reset example
+1. open reset link https://login.newrelic.com/passwords/forgot
+2. Enter the victim's email address and click Reset and Email Password
+3. Intercept the HTTP request in Burp Suite & add X-Forwarded Host Header and write
+attacker.com/.newrelic.com link
+4. The victim will receive the malicious link in their email, and, when clicked, will leak the user's password reset link / token to the attacker, leading to full account takeover.
+5. Two possible attach scenario:
+ - The attacker can capture the victim’s password reset token, from the link sent to the attack domain, and use it to create a random password. Because, token is saved to the database and attacker can use the token to find resetting password URL in the real application  This will lock the victim out of application.
+ - Or, the attacker can create a fake application password reset portal, something that looks exactly like the real one (combined with the almost similar domain name), then capture the new password that the victim picks. This would allow the attacker to continue using the vulnerable account, without locking the victim out, and the attacker can try use the new password in other applications within the company (under the assumption that the victim might have used the same password elsewhere).
+ 
+ #### Protection
+The application was vulnerable to this issue as it was directly reading the headers without validating them. Generally, in order to mitigate against Host Header Injection attacks, a whitelist needs to be implemented and the code must check against that whitelist to sanitise incoming/outgoing HTTP requests.
