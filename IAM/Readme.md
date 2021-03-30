@@ -83,7 +83,7 @@ user is authenticated.
 6. Application validates the token, creates a local session and allows the access.
 
 
-img
+![How access management works](img/access_management_procedure.png)
 
 
 After that procedure, the user works with the application normally. Only the first access goes
@@ -93,3 +93,29 @@ session management functionality
 
 In the LDAP case, it is the application
 that prompts for the password. In the AM case, the Access Management server does everything.
+
+## Web Single Sign-On
+Single Sign-On (SSO) systems allow user to authenticate once, and access number of different
+system after that. There are many SSO systems for web applications, however it looks like these
+systems are all using the same basic principle of operation. This general access management flow is
+described below:
+1. Application A redirects the user to the access management server (SSO server).
+2. The access management server authenticates the user.
+3. The access management server establishes session (SSO session) with the user browser. This is
+the crucial part of the SSO mechanism.
+4. User is redirected back to the application A. Application A usually establishes a local session with
+the user.
+5. User interacts with application A.
+6. When user tries to access application B, the application B redirects user to the access
+management server.
+7. The access management server checks for existence of SSO session. As the user authenticated
+with the access management server before, there is a valid SSO session.
+8. Access management server does not need to authenticate the user again and immediately
+redirects user back to application B.
+9. Application B establishes a local session with the user and proceeds normally.
+The user usually does not even realize that he was redirected when accessing application B. There is
+no interaction between the redirects and the redirects and the processing on the access
+management server is usually very fast. It looks like the user was logged into the application B all
+the time
+
+![How single sign-on works](img/single_sign_on.png)
