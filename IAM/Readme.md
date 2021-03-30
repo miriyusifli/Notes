@@ -179,7 +179,7 @@ target site now has claims about user identity.
 user is usually established at this point to skip the authentication redirects on the next request.
 The target site finally provides the content
 
-img
+![How SAML and OpenID sign-on works](img/SAML_OpenID.png)
 
 Following table compares the terminology and technologies used in SAML and OIDC worlds.
 
