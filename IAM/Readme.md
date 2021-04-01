@@ -310,7 +310,7 @@ Therefore the ease of connecting IDM system with its environment is one of its e
 Current IDM systems use connectors to communicate with all surrounding systems. These
 connectors are based on similar principles that database drivers
 
-img
+![Identity Management connectors](img/identity_management_connectors.png)
 
 
 Connector is usually relatively simple piece of code. Primary responsibility of a connector is to
@@ -360,7 +360,7 @@ contains permissions, permissions are used for authorization - that is the basic
 The low-level permissions are hidden from the users. Users are quite happy when they deal with
 the business-friendly role names. Most RBAC systems allow for roles to be placed inside other roles thus creating role hierarchy.
 
-img
+![Identity Management and RBAC](img/identity_management_and_RBAC.png)
 
 ## Identity Management and Authorizations
 The IDM system does not take direct part in authorization. IDM system sets up accounts in
@@ -427,7 +427,7 @@ administrators and security officers to live happily, to breath easily and to ke
 whole solution.
 
 
-img
+![Complete Identity and Access Management Solution](img/complete_identit_and_access_management_solution.png)
 
 
 ## IAM and Security
