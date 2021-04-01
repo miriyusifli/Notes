@@ -302,3 +302,176 @@ for every organization to operate in an efficient and secure manner. The IDM sys
 Very expensive. The IDM systems used to be so expensive, it was very difficult to justify the cost
 even with such substantial and clear benefits. But that time is over now.
 
+## Identity Management connectors
+Identity management system must connect to many different applications, databases and
+information systems. Typical IDM deployment has tens or even hundreds of such connections.
+Therefore the ease of connecting IDM system with its environment is one of its essential qualities.
+
+Current IDM systems use connectors to communicate with all surrounding systems. These
+connectors are based on similar principles that database drivers
+
+img
+
+
+Connector is usually relatively simple piece of code. Primary responsibility of a connector is to
+adapt communication protocols. Therefore LDAP connector translates the LDAP protocol messages
+into data represented using a common connector interface. The SQL connector does the same thing
+with SQL-based protocols. The connector also interprets the operations invoked on the common
+connector interface by the IDM system. Therefore the LDAP protocol will execute the "create"
+operation by sending LDAP "add" message to the LDAP server and parsing the reply.
+
+## Identity Provisioning
+Provisioning is perhaps the most frequently used feature in any IDM system. In the generic sense
+provisioning means maintenance of user accounts in applications, databases and other target
+systems. This includes creation of the account, various modifications during the account lifetime
+and permanent disable or delete at the end of the lifetime. The IDM system is using connectors to
+manipulate the accounts. Good IDM system can also manage,
+provision and synchronize organizational structures. However, this feature is still not entirely
+common.
+
+## Synchronization and Reconciliation
+Some applications already keep a track of the changes. Some databases record a timestamp of the
+last change for each row. Some directory servers keep a record of recent changes for the purpose of
+data replication. Such meta-data can be used by the IDM system. The IDM system may periodically
+scan the timestamps or replication logs for new changes. When the IDM detects a change it can
+retrieve the changed objects and react to the change based on its policies. The scanning for changes
+based on meta-data is usually very efficient therefore it can be executed every couple of minutes.
+Therefore the reaction to the change can be done almost in the real-time. This method has many
+names in various IDM systems. It is called "live synchronization", "active synchronization" or
+simply just "synchronization". Sadly, this method is not always available. In fact this ability is quite
+rare.
+
+But all is not lost. Even if the application does not maintain good meta-data that allow near-realtime change detection there is still one very simple way that works for almost any system. The IDM
+system gets the list of all accounts in the application. Then it compares that list with the list of
+accounts that are supposed to be there. Therefore it compares the reality (what is there) with the
+policy (what should be there). The IDM system can react to any discrepancies and repair them. This
+method is called reconciliation. It is quite a brutal method, almost barbaric. But it does the job.
+
+The drawback of synchronization is that it is not entirely reliable. The IDM system may miss
+some changes, e.g. due to change log expiration, system times not being synchronized or variety of
+other reasons. On the other hand, reconciliation is mostly reliable. But it is a very demanding task.
+Therefore these two methods are often used together. Synchronization runs all the time and
+handles the vast majority of the changes. Reconciliation runs weekly or monthly and it acts as a
+safety net to catch the changes that might have escaped during synchronization.
+
+## Identity Management and Role-Based Access Control
+User has a role, the role
+contains permissions, permissions are used for authorization - that is the basic principle of RBAC.
+The low-level permissions are hidden from the users. Users are quite happy when they deal with
+the business-friendly role names. Most RBAC systems allow for roles to be placed inside other roles thus creating role hierarchy.
+
+img
+
+## Identity Management and Authorizations
+The IDM system does not take direct part in authorization. IDM system sets up accounts in
+applications and databases. But the IDM system itself is not active when user logs into an
+application and executes the operations. Does that mean IDM system cannot do anything about
+authorizations? Definitely not. The IDM system does not enforce authorization decisions. But the
+IDM can manage the data that determine how the authorization is evaluated. IDM system can place
+the account to the correct groups, which will cause certain operations to be allowed and other
+operations denied. IDM system can set up an access control lists (ACLs) for each account that it
+manages. IDM system is not evaluating or enforcing the authorizations directly. But it indirectly
+manages the data that are used to evaluate authorizations. And this is an extremely important
+feature.
+
+## Organizational Structure, Roles, Services and Other Wildlife
+There are many things that an advanced IDM system can manage:
+- Accounts. Obviously. Many IDM systems can fully manage account attributes, groups
+membership, privileges, account status (enabled/disabled), validity dates and all the other
+details.
+- Groups and roles. Apart from managing the membership of accounts in groups the IDM system
+can take care of the whole group life-cycle: create a group, manage it and delete it.
+- Organizational structure. The IDM system can take organizational structure from its
+authoritative source (usually HR) and synchronize it to all the applications that need it. Or the
+IDM itself may be used to manually maintain an organizational structure.
+- Servers, services, devices and "things". While this is not yet IDM mainstream, there are some
+experimental solutions that use IDM principles to manage concepts that are slightly outside the
+traditional IDM scope. E.g. there is an IDM-based solution that can automatically deploy
+predefined set of virtual machines for each new project. The new IDM systems are so flexible
+that they can theoretically manage everything that is at least marginally related to the concept
+of identity: virtual machines, networks, applications, configurations, devices … almost anything.
+This is still quite a unique functionality. But it is very likely that we will see more stories about
+this in the future.
+
+## Complete Identity and Access Management Solution
+A clever combination of several components is needed to build complete solution. But there are three basic components that are required for any practical IAM deployment:
+- **Directory service** or a similar identity store is the first component. This is the database that
+stores user account information. The accounts are stored there in a “clean” form that can be
+used by other applications. This database is then widely shared by applications that are capable
+to connect to it. This part of the solution is usually implemented as a replicated LDAP server
+topology or Active Directory domain. This has an advantage of relatively low cost and high
+availability. But there is one major limitation: the data model needs to be simple. Very simple.
+And the identity store needs to be properly managed.
+- **Access Management** is a second major component of the solution. It takes care of
+authentication and (partially) authorization. Access management unifies authentication
+mechanisms. If an authentication mechanism is implemented in the access management server
+then all integrated applications can easily benefit. It also provides Single Sign-On (SSO),
+centralizes access logs and so on. It is a very useful component. But of course, there are
+limitations. AM system needs access to identity data. Therefore it needs reliable, very scalable
+and absolutely consistent identity database as a back-end. This is usually provided by the
+directory service. Performance and availability are the obvious obstacles here. But there is one
+more obstacle which is less obvious but every bit as important: data quality. The data in the
+directory service must be up to date and properly managed. But that is only part of the picture.
+As most applications store some pieces of identity data locally, these data also need to be
+synchronized with the directory database. No access management system can do this well
+enough. And there is no point for AM to do it at all. The AM system has a very different
+architectural responsibilities. Therefore yet another component is needed.
+- **Identity Management** is the last but in many ways the most important component. This is the
+real brain of the whole solution. The IDM system maintains the data. It is the component that
+keeps the entire system from falling apart. It makes sure the data are up to date and compliant
+with the policies. It synchronizes all the pieces of identity data that those pesky little
+applications always keep creating. It maintains groups, privileges, roles, organizational
+structures and all the other things necessary for the directory and the access management to
+work properly. It maintains order in the system. And it allows living and breathing system
+administrators and security officers to live happily, to breath easily and to keep control over the
+whole solution.
+
+
+img
+
+
+## IAM and Security
+Record who has access to what. Each user has accounts in many applications through the
+enterprise. Keep track which account belongs to which user. It is very difficult to do that
+manually. But even the worst IDM system can do that.
+- **Remove access quickly.** If there is a security incident then the access rights need to be removed
+in order of seconds. If an employee is fired then the accounts have to be disabled in order of
+minutes. It is not a problem for a system administrator to do that manually. But will the
+administrator be available during a security incident late in the night? Would you synchronize
+layoffs with the work time of system administrators? Wouldn’t system administrators forget to
+stop all the processes and background jobs that the user might have left behind? IDM system
+can do that easily. Security staff can simply disable all the accounts by using IDM system. Single
+click is all that is needed.
+- **Enforce policies.** Keep track about the privileges that were assigned to users. This usually
+means managing assignment of roles (and other entitlements) to users. Make sure that the
+assignment of sensitive roles is approved before user gets the privileges. Compare the policies
+and the reality. System administrators that create accounts and assign entitlements are not
+robots. Mistakes can happen. Make sure the mistakes are discovered and remediated. This is the
+natural best practice. But it is almost impossible to do manually. Yet even an average IDM
+system can do that without any problems.
+- **Remove unnecessary roles.** Role assignments and entitlements tend to accumulate over time.
+Long-time employees often have access to almost any asset simply because they needed the data
+at some point in their career. And the access to the asset was never removed since. This is a
+huge security risk. It can be mitigated by inventing a paper-based process to review the
+entitlements. But that process is very slow, costly, error-prone and it has to be repeated in
+regular intervals. But advanced IDM systems already support automation of this re-certification
+process.
+- **Maintain order.** If you closely follow the principle of least privilege then you have probably realized that you have more roles that you have users. Roles are abstract concepts and they are
+constantly evolving. Even experienced security professionals can easily get lost in the role
+hierarchies and structures. The ordinary end users often have absolutely no idea what roles
+they need. Yet, it is not that hard to sort the roles to categories if you maintain them in a good
+IDM system. This creates a role catalog that is much easier to understand, use and maintain.
+- Keep track. Keep an audit record about any privilege change. This means keeping track of all
+new accounts, account modifications, deletions, user and account renames, role assignments
+and unassignments, approvals, role definition changes, policy changes and so on. This is a huge
+task to do manually. And it is almost impossible to avoid mistakes. But a machine can do that
+easily and reliably.
+- **Scan for vulnerabilities.** Mistakes happen. System administrators often create testing accounts
+for troubleshooting purposes. And there is an old tradition to set trivial passwords to such
+accounts. These accounts are not always cleaned up after the troubleshooting is done. And there
+may be worse mistakes. System administrators may assign privileges to a wrong user. Help desk
+may enable account that should be permanently disabled. Therefore, all the applications have
+to be permanently scanned for accounts that should not be there and for entitlements that
+should not be assigned. This is simply too much work to be done manually. It is not really
+feasible unless a machine can scan all the system automatically. This is called reconciliation,
+and it is one of the basic functionalities of any decent IDM system
