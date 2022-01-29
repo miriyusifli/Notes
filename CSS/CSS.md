@@ -75,7 +75,7 @@ _Inherits:_ yes
 
 At minimum, the font property must include a font-size value and a font -family value, in that order. Omitting one or putting them in the wrong order causes the entire rule to be invalid. This is an example of a minimal font property value:
 
-```
+```CSS
 p { font: 1em sans-serif; }
 ```
 
@@ -219,7 +219,7 @@ _Inherits:_ no
 To apply multiple values for background-image , put them in a list separated
 by commas.
 
-```
+```CSS
 #example1 {
   background-image: url(img_flwr.gif), url(paper.gif);
   background-position: right bottom, left top;
