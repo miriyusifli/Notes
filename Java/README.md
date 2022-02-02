@@ -416,4 +416,288 @@ All exception types are subclasses of the built-in class Throwable. Thus, Throwa
 
 In some cases, more than one exception could be raised by a single piece of code. To handle this type of situation, you can specify two or more catch clauses, each catching a different type of exception. When an exception is thrown, each catch statement is inspected in order, and the first one whose type matches that of the exception is executed. After one catch statement executes, the others are bypassed, and execution continues after the try / catch block. When you use multiple catch statements, it is important to remember that exception subclasses must come before any of their superclasses. This is because a catch statement that uses a superclass will catch exceptions of that type plus any of its subclasses. Thus, a subclass would never be reached if it came after its superclass. Further, in Java, unreachable code is an error. For example, consider the following program:
                                                            
+## Multithreaded Programming
+A multithreaded program contains two or more parts that can run concurrently. Each part of such a program is called a thread, and each thread defines a separate path of execution. However, there are two distinct types of multitasking: *process-based* and *thread-based*.
 
+- *process-based multitasking* is the feature that allows your computer to run two or more programs concurrently. For example, process- based multitasking enables you to run the Java compiler at the same time that you are using a text editor or visiting a web site.
+
+- In a *thread-based multitasking *environment, the thread is the smallest unit of dispatchable code. This means that a single program can perform two or more tasks simultaneously. For instance, a text editor can format text at the same time that it is printing, as long as these two actions are being performed by two separate threads
+
+Multitasking threads require less overhead than multitasking processes. Processes are heavyweight tasks that require their own separate address spaces. Interprocess communication is expensive and limited. Context switching from one process to another is also costly. Threads, on the other hand, are lighter weight. They share the same address space and cooperatively share the same heavyweight process. Interthread communication is inexpensive, and context switching from one thread to the next is lower in cost. While Java programs make use of process-based multitasking environments, process-based multitasking is not under Java’s direct control.
+
+The value of a multithreaded environment is best understood in contrast to its counterpart. Single-threaded systems use an approach called an event loop with polling. In this model, a single thread of control runs in an infinite loop, polling a single event queue to decide what to do next. Once this polling mechanism returns with, say, a signal that a network file is ready to be read, then the event loop dispatches control to the appropriate event handler. Until this event handler returns, nothing else can happen in the program. This wastes CPU time. It can also result in one part of a program dominating the system and preventing any other events from being processed. In general, in a single- threaded environment, when a thread blocks (that is, suspends execution) because it is waiting for some resource, the entire program stops running.
+
+When a Java program starts up, one thread begins running immediately. This is usually called the main thread of your program, because it is the one that is executed when your program begins. The main thread is important for two reasons
+- It is the thread from which other “child” threads will be spawned.
+- Often, it must be the last thread to finish execution because it performs
+various shutdown actions.
+
+Although the main thread is created automatically when your program is started, it can be controlled through a Thread object. To do so, you must obtain a reference to it by calling the method currentThread( ), which is a public static member of Thread.
+
+### Thread Priorities
+a thread’s priority is used to decide when to switch from one running thread to the next. This is called a context switch. The rules that determine when a context switch takes place are simple:
+
+- A thread can voluntarily relinquish control. This occurs when explicitly yielding, sleeping, or when blocked. In this scenario, all other threads are examined, and the highest-priority thread that is ready to run is given the CPU.
+- A thread can be preempted by a higher-priority thread. In this case, a lower-priority thread that does not yield the processor is simply preempted—no matter what it is doing—by a higher-priority thread. Basically, as soon as a higher-priority thread wants to run, it does. This is called preemptive multitasking.
+
+Thread priorities are used by the thread scheduler to decide when each thread should be allowed to run. In theory, over a given period of time, higher-priority threads get more CPU time than lower-priority threads. In practice, the amount of CPU time that a thread gets often depends on several factors besides its priority.
+
+### Synchronization
+That is, you must prevent one thread from writing data while another thread is in the middle of reading it.
+
+- *the monitor:* You can think of a monitor as a very small box that can hold only one thread. Once a thread enters a monitor, all other threads must wait until that thread exits the monitor. In this way, a monitor can be used to protect a shared asset from being manipulated by more than one thread at a time.
+
+Once a thread is inside a synchronized method, no other thread can call any other synchronized method on the same object.
+
+### The Thread Class and the Runnable Interface
+Java’s multithreading system is built upon the Thread class, its methods, and its companion interface, Runnable. In the most general sense, you create a thread by instantiating an object of type Thread. Java defines two ways in which this can be accomplished:
+- You can implement the Runnable interface.
+- You can extend the Thread class, itself.
+
+
+#### Implementing Runnable
+After you create a class that implements Runnable, you will instantiate an object of type Thread from within that class. Thread defines several constructors. The one that we will use is shown here:
+```Java
+Thread(Runnable threadOb, String threadName)
+```
+In this constructor, threadOb is an instance of a class that implements the Runnable interface. This defines where execution of the thread will begin. The name of the new thread is specified by threadName.
+
+```Java
+public class TestThread implements Runnable{
+    Thread thread;
+
+    public TestThread() {
+        this.thread = new Thread(this,"Demo Thread");
+    }
+
+    public void run(){
+        try {
+            for (int i = 0; i < 10; i++) {
+                Thread.sleep(500);
+                System.out.println(i);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class Test {
+
+    public static void main(String[] args) {
+        TestThread t = new TestThread();
+
+        t.thread.start();
+    }
+}
+```
+Inside run( ), you will define the code that constitutes the new thread. It is important to understand that run( ) can call other methods, use other classes, and declare variables, just like the main thread can. The only difference is that run( ) establishes the entry point for another, concurrent thread of execution within your program. This thread will end when run( ) returns.After the new thread is created, it will not start running until you call its start( ) method, which is declared within Thread. In essence, start( ) initiates a call to run( ). 
+
+#### Extending Thread
+The second way to create a thread is to create a new class that extends Thread, and then to create an instance of that class. The extending class must override the run( ) method, which is the entry point for the new thread. As before, a call to start( ) begins execution of the new thread. Here is the preceding program rewritten to extend Thread:
+
+```Java
+package com.codeitlabs;
+
+public class TestThread extends Thread{
+
+    public TestThread() {
+        super("Demo Thread");
+    }
+
+    public void run(){
+        try {
+            for (int i = 0; i < 10; i++) {
+                Thread.sleep(500);
+                System.out.println(i);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class Test {
+
+    public static void main(String[] args) {
+        TestThread t = new TestThread();
+
+        t.start();
+    }
+}
+```
+
+#### Choosing an Approach
+Many Java programmers feel that classes should be extended only when they are being enhanced or adapted in some way. So, if you will not be overriding any of Thread’s other methods, it is probably best simply to implement Runnable.
+
+
+#### Using isAlive( ) and join( )
+- *isAlive( )* method returns true if the thread upon which it is called is still running. It returns false otherwise
+- While *isAlive( )* is occasionally useful, the method that you will more commonly use to wait for a thread to finish is called *join( )*. This method waits until the thread on which it is called terminates. Its name comes from the concept of the calling thread waiting until the specified thread joins it. Additional forms of join( ) allow you to specify a maximum amount of time that you want to wait for the specified thread to terminate. join() will put the current thread on wait until the thread on which it is called is dead. If thread is interrupted then it will throw InterruptedException.
+
+```Java
+package com.codeitlabs;
+
+public class TestThread extends Thread{
+
+    public TestThread() {
+        super("Demo Thread");
+    }
+
+    public void run(){
+        try {
+            for (int i = 0; i < 10; i++) {
+                Thread.sleep(500);
+                System.out.println(i);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+class Test {
+
+    public static void main(String[] args) {
+        TestThread t1 = new TestThread();
+        TestThread t2 = new TestThread();
+        TestThread t3 = new TestThread();
+
+        //Start the threads
+        t1.start();
+        t2.start();
+        t3.start();
+
+        try {
+            //Waiting for threads to finish
+            t1.join();
+            t2.join();
+            t3.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+}
+```
+
+
+#### Using Synchronized Methods
+Synchronization is easy in Java, because all objects have their own implicit monitor associated with them. To enter an object’s monitor, just call a method that has been modified with the synchronized keyword. While a thread is inside a synchronized method, all other threads that try to call it (or any other synchronized method) on the same instance have to wait.
+
+#### The synchronized Statement
+While creating synchronized methods within classes that you create is an easy and effective means of achieving synchronization, it will not work in all cases. To understand why, consider the following. Imagine that you want to synchronize access to objects of a class that was not designed for multithreaded access. That is, the class does not use synchronized methods. Further, this class was not created by you, but by a third party, and you do not have access to the source code. Thus, you can’t add synchronized to the appropriate methods within the class. How can access to an object of this class be synchronized? Fortunately, the solution to this problem is quite easy: You simply put calls to the methods defined by this class inside a synchronized block.
+
+```Java
+synchronized (objRef) {
+        //...
+}
+```
+
+#### Interthread Communication
+For example, consider the classic queuing problem, where one thread is producing some data and another is consuming it. To make the problem more interesting, suppose that the producer has to wait until the consumer is finished before it generates more data. In a polling system, the consumer would waste many CPU cycles while it waited for the producer to produce. Once the producer was finished, it would start polling, wasting more CPU cycles waiting for the consumer to finish, and so on. Clearly, this situation is undesirable.
+
+To avoid polling, Java includes an elegant interprocess communication mechanism via the wait( ), notify( ), and notifyAll( ) methods. These methods are implemented as final methods in Object, so all classes have them. All three methods can be called only from within a synchronized context. Although conceptually advanced from a computer science perspective, the rules for using these methods are actually quite simple:
+
+- wait( ) tells the calling thread to give up the monitor and go to sleep until some other thread enters the same monitor and calls notify( ) or notifyAll( ).
+- notify( ) wakes up a thread that called wait( ) on the same object.
+- notifyAll( ) wakes up all the threads that called wait( ) on the same
+object. One of the threads will be granted access.
+
+ To begin, consider the following sample program that incorrectly implements a simple form of the producer/consumer problem. It consists of four classes: Q, the queue that you’re trying to synchronize; Producer, the threaded object that is producing queue entries; Consumer, the threaded object that is consuming queue entries; and PC, the tiny class that creates the single Q, Producer, and Consumer.
+
+ ```Java
+
+public class Q {
+    int i=0;
+    boolean valueSet = false;
+
+    public synchronized void put(int i)  {
+        while (valueSet){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.i = i;
+        System.out.println("Put "+i);
+        notify();
+        valueSet = true;
+    }
+
+    public synchronized int get() {
+        while(!valueSet){
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("Got "+i);
+        notify();
+        valueSet = false;
+
+        return i;
+    }
+
+    }
+
+class Producer implements Runnable {
+    Q q;
+    Thread t;
+    public Producer(Q q){
+        this.q = q;
+        t = new Thread(this, "Producer");
+    }
+    @Override
+    public void run() {
+        int i = 0;
+        while (true){
+            q.put(i++);
+        }
+    }
+}
+
+class Consumer implements Runnable {
+    Q q;
+    Thread t;
+
+    public Consumer(Q q) {
+        this.q = q;
+        t = new Thread(this, "Consumer");
+    }
+    
+    @Override
+    public void run() {
+        while(true)
+        q.get();
+    }
+}
+
+class Test {
+    public static void main(String[] args) {
+        Q q=new Q();
+        Producer p = new Producer(q);
+        Consumer c = new Consumer(q);
+
+        p.t.start();
+        c.t.start();
+    }
+}
+```
+
+#### Deadlock
+Deadlock in Java is a condition when two or more threads try to access the same resources at the same time. Then these threads can never access the resource and eventually go into the waiting state forever.
+
+
+#### Obtaining a Thread’s State
+As mentioned earlier in this chapter, a thread can exist in a number of different states. You can obtain the current state of a thread by calling the *getState( )* method defined by Thread.
+
+![alt text](img/img4.png " ")
+
+![alt text](img/img5.png " ")
+
+#### Using Multithreading
+The key to utilizing Java’s multithreading features effectively is to think concurrently rather than serially. For example, when you have two subsystems within a program that can execute concurrently, make them individual threads. With the careful use of multithreading, you can create very efficient programs. A word of caution is in order, however: If you create too many threads, you can actually degrade the performance of your program rather than enhance it. Remember, some overhead is associated with context switching. If you create too many threads, more CPU time will be spent changing contexts than executing your program! One last point: To create compute-intensive applications that can automatically scale to make use of the available processors in a multicore system, consider using the Fork/Join Framework,
