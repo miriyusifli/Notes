@@ -701,3 +701,351 @@ As mentioned earlier in this chapter, a thread can exist in a number of differen
 
 #### Using Multithreading
 The key to utilizing Java’s multithreading features effectively is to think concurrently rather than serially. For example, when you have two subsystems within a program that can execute concurrently, make them individual threads. With the careful use of multithreading, you can create very efficient programs. A word of caution is in order, however: If you create too many threads, you can actually degrade the performance of your program rather than enhance it. Remember, some overhead is associated with context switching. If you create too many threads, more CPU time will be spent changing contexts than executing your program! One last point: To create compute-intensive applications that can automatically scale to make use of the available processors in a multicore system, consider using the Fork/Join Framework,
+
+## Enumerations
+Notice that in the case statements, the names of the enumeration constants are used without being qualified by their enumeration type name. That is, Winesap, not Apple.Winesap, is used. This is because the type of the enumeration in the switch expression has already implicitly specified the enum type of the case constants. There is no need to qualify the constants in the case statements with their enum type name. In fact, attempting to do so will cause a compilation error.
+
+```Java
+swith(ap){
+    case Jonathan:
+        //...
+    case Winesap:
+        //...
+}
+```
+
+All enumerations automatically contain two predefined methods: values( ) and valueOf( ).
+
+```Java
+public static enum-type [ ] values( )
+public static enum-type valueOf(String str )
+```
+
+It is important to understand that each enumeration constant is an object of its enumeration type. Thus, when you define a constructor for an enum, the constructor is called when each enumeration constant is created. Also, each enumeration constant has its own copy of any instance variables defined by the enumeration. For example, consider the following version of Apple:
+
+```Java
+enum Apple {
+    Jonathan(10), GoldenDel(9), RedDel(12), Winesap(15), Cortland(8);
+
+    private int price;
+    
+    //Constructor
+    Apple(int p){
+        this.price = p;
+    }
+
+    int getPrice(){
+        return this.price;
+    }
+}
+```
+
+Although you can’t inherit a superclass when declaring an enum, all enumerations automatically inherit one: java.lang.Enum. 
+
+You can obtain a value that indicates an enumeration constant’s position in the list of constants. This is called its ordinal value, and it is retrieved by calling the ordinal( ) method, shown here:
+```Java
+final int ordinal( )
+```
+
+It returns the ordinal value of the invoking constant. Ordinal values begin at zero. Thus, in the Apple enumeration, Jonathan has an ordinal value of zero, GoldenDel has an ordinal value of 1, RedDel has an ordinal value of 2, and so on. You can compare the ordinal value of two constants of the same enumeration by using the compareTo( ) method. It has this general form:
+
+```Java
+final int compareTo(enum-type e)
+```
+
+You can compare for equality an enumeration constant with any other object by using equals( ), which overrides the equals( ) method defined by Object. Although equals( ) can compare an enumeration constant to any other object, those two objects will be equal only if they both refer to the same constant, within the same enumeration. Simply having ordinal values in common will not cause equals( ) to return true if the two constants are from different enumerations.
+
+## Type Wrappers
+The primitive types are not part of the object hierarchy, and they do not inherit Object.
+
+Java provides type wrappers, which are classes that encapsulate a primitive type within an object.
+
+## Annotation Basics
+An annotation is created through a mechanism based on the interface. Let’s begin with an example. Here is the declaration for an annotation called MyAnno:
+
+```Java
+@interface MyAnno {
+    String str();
+    int val();
+}
+```
+First, notice the @ that precedes the keyword interface. This tells the compiler that an annotation type is being declared. Next, notice the two members str( ) and val( ). All annotations consist solely of method declarations. However, you don’t provide bodies for these methods. Instead, Java implements these methods. Moreover, the methods act much like fields, as you will see. An annotation cannot include an extends clause. However, all annotation types automatically extend the Annotation interface. Thus, Annotation is a super-interface of all annotations. 
+
+### Specifying a Retention Policy
+Java defines three such policies, which are encapsulated within the java.lang.annotation.RetentionPolicy enumeration. They are SOURCE, CLASS, and RUNTIME. 
+- An annotation with a retention policy of SOURCE is retained only in the source file and is discarded during compilation. 
+- An annotation with a retention policy of CLASS is stored in the .class file during compilation. However, it is not available through the JVM during run time.
+- An annotation with a retention policy of RUNTIME is stored in the .class file during compilation and is available through the JVM during run time. Thus, RUNTIME retention offers the greatest annotation persistence.
+
+If no retention policy is specified for an annotation, then the default policy of CLASS is used.
+
+```Java
+@Retention(RetentionPolicy.RUNTIME)
+@interface MyAnno {
+    String str();
+    int val();
+}
+```
+
+### Using Default Values
+You can give annotation members default values that will be used if no value is specified when the annotation is applied. A default value is specified by adding a default clause to a member’s declaration. It has this general form:
+
+```Java
+@Retention(RetentionPolicy.RUNTIME)
+@interface MyAnno {
+    String str() default "Testing";
+    int val() default 9000;
+}
+```
+
+### @Target
+The @Target annotation specifies the types of items to which an annotation can be applied. It is designed to be used only as an annotation to another annotation. @Target takes one argument, which is an array of constants of the ElementType enumeration. You can specify one or more of these values in a @Target annotation. To specify multiple values, you must specify them within a braces-delimited list. 
+```Java
+@Target( { ElementType.FIELD, ElementType.LOCAL_VARIABLE } )
+```
+
+## Streams
+Java programs perform I/O through streams. A stream is an abstraction that either produces or consumes information. Java defines two types of streams: byte and character. Byte streams provide a convenient means for handling input and output of bytes. 
+- Byte streams are used, for example, when reading or writing binary data. 
+- Character streams provide a convenient means for handling input and output of characters. They use Unicode and, therefore, can be internationalized. Also, in some cases, character streams are more efficient than byte streams.
+
+## Automatically Closing a File
+This feature, sometimes referred to as automatic resource management, or ARM for short, is based on an expanded version of the try statement. Typically, resource-specification is a statement that declares and initializes a resource, such as a file stream. It consists of a variable declaration in which the variable is initialized with a reference to the object being managed. When the try block ends, the resource is automatically released. In the case of a file, this means that the file is automatically closed. This form of try is called the try-with-resources statement. The try-with-resources statement can be used only with those resources that implement the AutoCloseable interface. This interface defines the close( ) method.
+
+```Java
+try(FileInputStream fin = new FileInputStream("file")){
+
+    do {
+        i = fin.read();
+    } while(i! = -1);
+
+}
+```
+When the try is left, the stream associated with fin is automatically closed by an implicit call to close( ). You don’t need to call close( ) explicitly, which means that you can’t forget to close the file. It is important to understand that a resource declared in the try statement is implicitly final. This means that you can’t assign to the resource after it has been created. Also, the scope of the resource is limited to the try-with- resources statement. You can manage more than one resource within a single try statement. To do so, simply separate each resource specification with a semicolon. The following program shows an example.
+
+```Java
+try(FileInputStream fin = new FileInputStream("file");
+    FileInputStream fin = new FileInputStream("file1")){
+    //...
+}
+```
+
+## The transient and volatile Modifiers
+Java defines two interesting type modifiers: transient and volatile. When an instance variable is declared as transient, its value need not persist when an object is stored. For example: Here, if an object of type T is written to a persistent storage area, the contents of a would not be saved, but the contents of b would.
+
+```Java
+class T {
+    transient int a; // will not persist
+    int b; // will persist
+
+}
+```
+
+## Static Import
+Java includes a feature called static import that expands the capabilities of the import keyword. By following import with the keyword static, an import statement can be used to import the static members of a class or interface. When using static import, it is possible to refer to static members directly by their names, without having to qualify them with the name of their class. This simplifies and shortens the syntax required to use a static member.
+
+## Generics
+Through the use of generics, it is possible to create classes, interfaces, and methods that will work in a type-safe manner with various kinds of data. 
+```Java
+class Gen <T> {
+    T ob;
+
+    Gen (T o){
+        ob = o;
+    }
+
+    T getob(){
+        return ob;
+    }
+}
+```
+
+Before moving on, it’s necessary to state that the Java compiler does not actually create different versions of Gen, or of any other generic class. Although it’s helpful to think in these terms, it is not what actually happens. Instead, the compiler removes all generic type information, substituting the necessary casts, to make your code behave as if a specific version of Gen were created. Thus, there is really only one version of Gen that actually exists in your program. The process of removing generic type information is called erasure, and we will return to this topic later in this chapter.
+
+You cannot use a primitive type, such as int or char.
+
+At this point, you might be asking yourself the following question: Given that the same functionality found in the generic Gen class can be achieved without generics, by simply specifying Object as the data type and employing the proper casts, what is the benefit of making Gen generic? The answer is that generics automatically ensure the type safety of all operations involving Gen. In the process, they eliminate the need for you to enter casts and to type-check code by hand. However, it also prevents the Java compiler from having any real knowledge about the type of data actually stored in NonGen, which is bad for two reasons. First, explicit casts must be employed to retrieve the stored data. Second, many kinds of type mismatch errors cannot be found until run time. Let’s look closely at each problem.
+```Java
+int v = (Integer) iOb.getob();
+```
+
+```Java
+// This compiles, but is conceptually wrong! 
+iOb = strOb;
+v = (Integer) iOb.getob(); // run-time error!
+```
+
+You can declare more than one type parameter in a generic type. To specify two or more type parameters, simply use a comma-separated list. For example, the following TwoGen class is a variation of the Gen class that has two type parameters:
+
+```Java
+class Gen <T,V> {
+    T ob;
+    V ov;
+
+    Gen (T o, V v){
+        ob = o;
+        ov = v;
+    }
+
+    T getob(){
+        return ob;
+    }
+}
+```
+Although the two type arguments differ in this example, it is possible for both types to be the same.
+```Java
+TwoGen<String, String> x = new TwoGen<String, String> ("A", "B");
+```
+
+In addition to using a class type as a bound, you can also use an interface type. In fact, you can specify multiple interfaces as bounds. Furthermore, a bound can include both a class type and one or more interfaces. In this case, the class type must be specified first. When a bound includes an interface type, only type arguments that implement that interface are legal. When specifying a bound that has a class and an interface, or multiple interfaces, use the & operator to connect them. This creates an intersection type. For example
+
+```Java
+class Gen<T extends MyClass & MyInterface> { 
+    // ...
+```
+Here, T is bounded by a class called MyClass and an interface called MyInterface. Thus, any type argument passed to T must be a subclass of MyClass and implement MyInterface.
+
+
+### Erasure
+In general, here is how erasure works. When your Java code is compiled, all generic type information is removed (erased). This means replacing type parameters with their bound type, which is Object if no explicit bound is specified, and then applying the appropriate casts (as determined by the type arguments) to maintain type compatibility with the types specified by the type arguments. The compiler also enforces this type compatibility. This approach to generics means that no type parameters exist at run time. They are simply a source-code mechanism.
+
+## Lambda Expressions
+A lambda expression is, essentially, an anonymous (that is, unnamed) method. The new operator, sometimes referred to as the lambda operator or the arrow operator, is −>. It divides a lambda expression into two parts. The left side specifies any parameters required by the lambda expression. (If no parameters are needed, an empty parameter list is used.) On the right side is the lambda body, which specifies the actions of the lambda expression. The −> can be verbalized as “becomes” or “goes to.” As stated, a functional interface is an interface that specifies only one abstract method.
+
+```Java
+interface MyNumber {
+    double getValue();
+}
+```
+
+As mentioned earlier, a lambda expression is not executed on its own. Rather, it forms the implementation of the abstract method defined by the functional interface that specifies its target type. One other point before moving on. When a lambda expression has only one parameter, it is not necessary to surround the parameter name with parentheses when it is specified on the left side of the lambda operator. For example, this is also a valid way to write the lambda expression used in the program:
+```Java
+n -> (n % 2)==0
+```
+
+In fact, passing a lambda expression as an argument is a common use of lambdas. Moreover, it is a very powerful use because it gives you a way to pass executable code as an argument to a method.
+
+However, when a lambda expression uses a local variable from its enclosing scope, a special situation is created that is referred to as a variable capture. In this case, a lambda expression may only use local variables that are effectively final. An effectively final variable is one whose value does not change after it is first assigned. There is no need to explicitly declare such a variable as final, although doing so would not be an error. (The this parameter of an enclosing scope is automatically effectively final, and lambda expressions do not have a this of their own.)
+It is important to understand that a local variable of the enclosing scope cannot be modified by the lambda expression. Doing so would remove its effectively final status, thus rendering it illegal for capture.
+The following program illustrates the difference between effectively final and mutable local variables:
+
+```Java
+interface MyFunc {
+    int func (int n);
+}
+
+class VarCapture {
+    public static void main (String args[]){
+
+        //A local variable that can be captured.
+        int num = 10;
+
+        MyFunc mylambda = (n) -> {
+            //This use of num is OK. It does not modify num.
+            int v = num + n;
+
+            //However, the following is illegal because it attemps to modify the value of num.
+            //num++;
+
+            return v;
+        }
+
+        //The following line would also cause an error, beause it would remove the effectively final status from num.
+        //num = 9;
+    }
+}
+```
+
+There is an important feature related to lambda expressions called the method reference. A method reference provides a way to refer to a method without executing it. It relates to lambda expressions because it, too, requires a target type context that consists of a compatible functional interface. When evaluated, a method reference also creates an instance of the functional interface. There are different types of method references. We will begin with method references to static methods. 
+
+To create a static method reference, use this general syntax:
+ ```Java
+ ClassName::methodName
+ ```
+
+ Notice that the class name is separated from the method name by a double colon. The :: is a separator that was added to Java by JDK 8 expressly for this purpose. This method reference can be used anywhere in which it is compatible with its target type. The following program demonstrates a static method reference:
+
+```Java
+interface StringFunc {
+  String func(String n);
+}
+
+class MyStringOps {
+    static String strReverse(String str){
+        String resutl = "";
+        for(int i = str.length()-1; i>=0;i--)
+            result+=str.charAt(1);
+    }
+
+    return result;
+}
+
+class MethodRefDemo {
+    static String stringOp(StringFunc sf, String s){
+        sf.func(s);
+    }
+
+
+    public static void main(String args[]){
+        String inStr = "Lambdas add power to Java";
+        String outStr;
+
+        outStr = stringOp(MyStringOps::strReverse, inStr);
+
+        System.out.println("Original :" +inStr);
+        System.out.println("Reversed :" +outStr);
+    }
+}
+```
+
+
+You can use method references with generic classes and/or generic methods. For example, consider the following program:
+
+```Java
+interface StringFunc<T> {
+  String func(T[] vals, T v);
+}
+
+class MyArrayOps {
+    static <T> int countMatching(T [], T v){
+        int count = 0;
+
+        for(int i=0;i<vals.length;i++){
+            if(vals[i]==v) count++;
+
+            return count;
+        }
+    }
+}
+
+
+class GenericMethodRefDemo {
+
+    static <T> int myOp(MyFunc <T> f, T[] vals, T v){
+        return f.func(vals,v);
+    }
+
+    public static void main(String args[]){
+        Integer[] vals = {1, 2, 3, 4, 2, 3 , 4, 4, 5};
+        String [] strs = {"One", "Two", "Three" , "Two" }
+
+        int count;
+
+        count myOp(MyArrayOps::<Integer> countMatching, vals, 4);
+        System.out.println("vals contains "+count + " 4s");
+
+        count = myOp(MyArrayOps::<String>countMatching, strs, "Two");
+    }
+}
+```
+The output is shown here:
+
+```
+vals contains 3 4s
+strs contains 2 Twos
+```
+
+## Predefined Functional Interfaces
+Up to this point, the examples in this chapter have defined their own functional interfaces so that the fundamental concepts behind lambda expressions and functional interfaces could be clearly illustrated. However, in many cases, you won’t need to define your own functional interface because the package called java.util.function provides several predefined ones. Although we will look at them more closely in Part II, here is a sampling:
+
+![alt text](img/img6.png " ")
