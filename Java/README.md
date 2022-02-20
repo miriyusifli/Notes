@@ -1049,3 +1049,405 @@ strs contains 2 Twos
 Up to this point, the examples in this chapter have defined their own functional interfaces so that the fundamental concepts behind lambda expressions and functional interfaces could be clearly illustrated. However, in many cases, you won’t need to define your own functional interface because the package called java.util.function provides several predefined ones. Although we will look at them more closely in Part II, here is a sampling:
 
 ![alt text](img/img6.png " ")
+
+
+## The Collections
+
+### The Collection Interfaces
+
+![alt text](img/img7.png " ")
+
+In addition to the collection interfaces, collections also use the Comparator, RandomAccess, Iterator, ListIterator, and Spliterator interfaces, which are described in depth later in this chapter. Briefly, Comparator defines how two objects are compared; Iterator, ListIterator, and Spliterator enumerate the objects within a collection. By implementing RandomAccess, a list indicates that it supports efficient, random access to its elements.
+
+### The List Interface
+The List interface extends Collection and declares the behavior of a collection that stores a sequence of elements. Elements can be inserted or accessed by their position in the list, using a zero-based index. A list may contain duplicate elements.
+
+A NullPointerException is thrown if an attempt is made to store a null object and null elements are not allowed in the list.
+
+Beginning with JDK 9, List includes the of( ) factory method, which has a number of overloads. Each version returns an unmodifiable, value-based collection that is comprised of the arguments that it is passed. Null elements are not allowed.
+```Java
+static <E> List<E> of( )
+```
+### The Set Interface
+It extends Collection and specifies the behavior of a collection that does not allow duplicate elements. Therefore, the add( ) method returns false if an attempt is made to add duplicate elements to a set.
+
+Beginning with JDK 9, Set includes the of( ) factory method, which has a
+number of overloads. Each version returns an unmodifiable, value-based collection that is comprised of the arguments that it is passed. For all versions, null elements are not allowed. 
+```Java
+static <E> Set<E> of( )
+```
+
+
+Beginning with JDK 10, Set includes the static copyOf( ) method shown here:
+```Java
+static <E> Set<E> copyOf(Collection <? extends E> from)
+```
+
+It returns a set that contains the same elements as from. Null values are not allowed. The returned set is unmodifiable.
+
+### The SortedSet Interface
+The SortedSet interface extends Set and declares the behavior of a set sorted in
+ascending order. 
+
+A NullPointerException is thrown if an attempt is made to use a null object and null is not allowed in the set.
+
+SortedSet defines several methods that make set processing more convenient. To obtain the first object in the set, call first( ). To get the last element, use last( ). You can obtain a subset of a sorted set by calling subSet( ), specifying the first and last object in the set. If you need the subset that starts with the first element in the set, use headSet( ). If you want the subset that ends the set, use tailSet( ).
+
+
+### The NavigableSet Interface
+The NavigableSet interface extends SortedSet and declares the behavior of a collection that supports the retrieval of elements based on the closest match to a given value or values.
+
+A NullPointerException is thrown if an attempt is made to use a null object and null is not allowed in the set.
+
+### The Queue Interface
+The Queue interface extends Collection and declares the behavior of a queue, which is often a first-in, first-out list.
+
+A NullPointerException is thrown if an attempt is made to store a null object and null elements are not allowed in the queue.
+
+The difference between them is that poll( ) returns null if the queue is empty, but remove( ) throws an exception. Third, there are two methods, element( ) and peek( ), that obtain but don’t remove the element at the head of the queue. They differ only in that element( ) throws an exception if the queue is empty, but peek( ) returns null. Finally, notice that offer( ) only attempts to add an element to a queue. Because some queues have a fixed length and might be full, offer( ) can fail.
+
+### The Deque Interface
+The Deque interface extends Queue and declares the behavior of a double- ended queue. Double-ended queues can function as standard, first-in, first-out queues or as last-in, first-out stacks.
+
+A NullPointerException is thrown if an attempt is made to store a null object and null elements are not allowed in the deque.
+
+Notice that Deque includes the methods push( ) and pop( ). These methods enable a Deque to function as a stack. Also, notice the descendingIterator( ) method. It returns an iterator that returns elements in reverse order. In other words, it returns an iterator that moves from the end of the collection to the start. A Deque implementation can be capacity-restricted, which means that only a limited number of elements can be added to the deque. When this is the case, an attempt to add an element to the deque can fail. Deque allows you to handle such a failure in two ways. First, methods such as addFirst( ) and addLast( ) throw an IllegalStateException if a capacity-restricted deque is full. Second, methods such as offerFirst( ) and offerLast( ) return false if the element cannot be added.
+
+## The Collection Classes
+
+### The ArrayList Class
+ArrayList supports dynamic arrays that can grow as needed. 
+
+Although the capacity of an ArrayList object increases automatically as objects are stored in it, you can increase the capacity of an ArrayList object manually by calling ensureCapacity( ). You might want to do this if you know in advance that you will be storing many more items in the collection than it can currently hold. By increasing its capacity once, at the start, you can prevent several reallocations later. Because reallocations are costly in terms of time, preventing unnecessary ones improves performance. The signature for ensureCapacity( ) is shown here:
+
+```Java
+void ensureCapacity(int cap)
+```
+Here, cap specifies the new minimum capacity of the collection.
+
+
+Conversely, if you want to reduce the size of the array that underlies an
+ArrayList object so that it is precisely as large as the number of items that it is currently holding, call trimToSize( ), shown here:
+
+```Java
+void trimToSize( )
+```
+
+
+### The HashSet Class
+HashSet extends AbstractSet and implements the Set interface. It creates a collection that uses a hash table for storage. As most readers likely know, a hash table stores information by using a mechanism called hashing. In hashing, the informational content of a key is used to determine a unique value, called its hash code. The hash code is then used as the index at which the data associated with the key is stored. The transformation of the key into its hash code is performed automatically—you never see the hash code itself.
+
+It is important to note that HashSet does not guarantee the order of its elements, because the process of hashing doesn’t usually lend itself to the creation of sorted sets. If you need sorted storage, then another collection, such as TreeSet, is a better choice.
+
+
+As explained, the elements are not stored in sorted order, and the precise output may vary.
+
+### The LinkedHashSet Class
+
+LinkedHashSet maintains a linked list of the entries in the set, in the order in which they were inserted. This allows insertion-order iteration over the set.
+
+### The TreeSet Class
+Objects are stored in sorted, ascending order. Access and retrieval times are quite fast, which makes TreeSet an excellent choice when storing large amounts of sorted information that must be found quickly.
+ 
+### The PriorityQueue Class
+PriorityQueue extends AbstractQueue and implements the Queue interface. It creates a queue that is prioritized based on the queue’s comparator. In all cases, the capacity grows automatically as elements are added.
+If no comparator is specified when a PriorityQueue is constructed, then the default comparator for the type of data stored in the queue is used. The default comparator will order the queue in ascending order. Thus, the head of the queue will be the smallest value. However, by providing a custom comparator, you can specify a different ordering scheme. For example, when storing items that include a time stamp, you could prioritize the queue such that the oldest items are first in the queue.
+
+### The EnumSet Class
+EnumSet extends AbstractSet and implements Set. It is specifically for use
+with elements of an enum type. EnumSet defines no constructors. Instead, it uses the factory methods
+
+## Accessing a Collection via an Iterator
+Iterator enables you to cycle through a collection, obtaining or removing elements. ListIterator extends Iterator to allow bidirectional traversal of a list, and the modification of elements. 
+
+### Using an Iterator
+Each of the collection classes provides an iterator( ) method that returns an iterator to the start of the collection. By using this iterator object, you can access each element in the collection, one element at a time. In general, to use an iterator to cycle through the contents of a collection, follow these steps:
+
+1. Obtain an iterator to the start of the collection by calling the collection’s iterator( ) method.
+2. Set up a loop that makes a call to hasNext( ). Have the loop iterate as long as hasNext( ) returns true.
+3. Within the loop, obtain each element by calling next( ).
+
+For collections that implement List, you can also obtain an iterator by calling listIterator( ). As explained, a list iterator gives you the ability to access the collection in either the forward or backward direction and lets you modify an element. Otherwise, ListIterator is used just like Iterator.
+
+### The For-Each Alternative to Iterators
+If you won’t be modifying the contents of a collection or obtaining elements in reverse order, then the for-each version of the for loop is often a more convenient alternative to cycling through a collection than is using an iterator.
+
+## Working with Maps
+The keys must be unique, but the values may be duplicated. Some maps can accept a null key and null values, others cannot. There is one key point about maps that is important to mention at the outset: they don’t implement the Iterable interface. This means that you cannot cycle through a map using a for-each style for loop.
+
+A NullPointerException is thrown if an attempt is made to use a null object and null is not allowed in the map. There are 11 overloads of of( ). One takes no arguments and creates an empty map
+
+### The SortedMap Interface
+The SortedMap interface extends Map. It ensures that the entries are maintained in ascending order based on the keys.
+
+### The NavigableMap Interface
+The NavigableMap interface extends SortedMap and declares the behavior of a map that supports the retrieval of entries based on the closest match to a given key or keys
+
+## The Map Classes
+WeakHashMap implements a map that uses “weak keys,” which allows an element in a map to be garbage-collected when its key is otherwise unused. This class is not discussed further here. The other map classes are described next.
+
+### The HashMap Class
+It uses a hash table to store the map. This allows the execution time of get( ) and put( ) to remain constant even for large sets.
+
+### The TreeMap Class
+A TreeMap provides an efficient means of storing key/value pairs in sorted order and allows rapid retrieval. You should note that, unlike a hash map, a tree map guarantees that its elements will be sorted in ascending key order. 
+
+### The LinkedHashMap Class
+LinkedHashMap extends HashMap. It maintains a linked list of the entries in the map, in the order in which they were inserted. This allows insertion-order iteration over the map. That is, when iterating through a collection-view of a LinkedHashMap, the elements will be returned in the order in which they were inserted.
+
+## Comparators
+Both TreeSet and TreeMap store elements in sorted order. However, it is the comparator that defines precisely what “sorted order” means. By default, these classes store their elements by using what Java refers to as “natural ordering,” which is usually the ordering that you would expect (A before B, 1 before 2, and so forth). If you want to order elements a different way, then specify a Comparator when you construct the set or map. Doing so gives you the ability to govern precisely how elements are stored within sorted collections and maps. Comparator is a generic interface that has this declaration:
+
+```Java
+interface Comparator<T>
+```
+Here, T specifies the type of objects being compared.
+
+Prior to JDK 8, the Comparator interface defined only two methods: compare( ) and equals( ). The compare( ) method, shown here, compares two elements for order:
+```Java
+int compare(T obj1, T obj2)
+```
+Normally, this method returns zero if the objects are equal. It returns a positive value if obj1 is greater than obj2. Otherwise, a negative value is returned. The equals( ) method, shown here, tests whether an object equals the invoking comparator:
+```Java
+boolean equals(object obj)
+```
+
+You can obtain a comparator that reverses the ordering of the comparator on which it is called by using reversed( ), shown here:
+```Java
+default Comparator<T> reversed( )
+```
+It returns the reverse comparator. For example, assuming a comparator that uses natural ordering for the characters A through Z, a reverse order comparator would put B before A, C before B, and so on.
+A method related to reversed( ) is reverseOrder( ), shown next:
+```Java
+static <T extends Comparable<? super T>> Comparator<T> reverseOrder( )
+```
+It returns a comparator that reverses the natural order of the elements. Conversely, you can obtain a comparator that uses natural ordering by calling the static method naturalOrder( ), shown next:
+```Java
+static <T extends Comparable<? super T>> Comparator<T> naturalOrder( )
+```
+
+If you want a comparator that can handle null values, use nullsFirst( ) or nullsLast( ), shown here:
+```Java
+static <T> Comparator<T> nullsFirst(Comparator<? super T> comp) static <T> Comparator<T> nullsLast(Comparator<? super T> comp)
+```
+The nullsFirst( ) method returns a comparator that views null values as less than other values. The nullsLast( ) method returns a comparator that views null values as greater than other values. In both cases, if the two values being compared are non-null, comp performs the comparison. If comp is passed null, then all non-null values are viewed as equivalent.
+
+Another default method is thenComparing( ). It returns a comparator that performs a second comparison when the outcome of the first comparison indicates that the objects being compared are equal. Thus, it can be used to create a “compare by X then compare by Y” sequence. For example, when comparing cities, the first comparison might compare names, with the second comparison comparing states
+```Java
+default Comparator<T> thenComparing(Comparator<? super T> thenByComp)
+```
+Here, thenByComp specifies the comparator that is called if the first comparison returns equal.
+
+The next versions of thenComparing( ) let you specify the standard functional interface Function (defined by java.util.function). They are shown here:
+
+
+## Arrays
+The binarySearch( ) method uses a binary search to find a specified value.
+
+The copyOf( ) method returns a copy of an array.
+
+The copyOfRange( ) method returns a copy of a range within an array.
+
+The equals( ) method returns true if two arrays are equivalent.
+
+The deepEquals( ) method can be used to determine if two arrays, which might contain nested arrays, are equal. It returns true if the arrays passed in a and b contain the same elements. If a and b contain nested arrays, then the contents of those nested arrays are also checked. It returns false if the arrays, or any nested arrays, differ.
+
+The fill( ) method assigns a value to all elements in an array. In other words, it fills an array with a specified value. 
+
+The sort( ) method sorts an array so that it is arranged in ascending order.
+
+One quite powerful method in Arrays is parallelSort( ) because it sorts, into ascending order, portions of an array in parallel and then merges the results. This approach can greatly speed up sorting times. Like sort( ), there are two basic types of parallelSort( ), each with several overloads. The first type sorts the entire array.
+
+## The Legacy Classes and Interfaces
+One other point: none of the modern collection classes described in this chapter are synchronized, but all the legacy classes are synchronized. The legacy classes defined by java.util are shown here:
+- Dictionary
+- Hashtable
+- Properties
+- Stack
+- Vector
+
+### Vector
+Vector implements a dynamic array. It is similar to ArrayList, but with two differences: Vector is synchronized, and it contains many legacy methods that duplicate the functionality of methods defined by the Collections Framework.
+
+### Stack
+Stack is a subclass of Vector that implements a standard last-in, first-out stack.
+
+### Dictionary
+Dictionary is an abstract class that represents a key/value storage repository and operates much like Map.
+
+### Hashtable
+Hashtable was part of the original java.util and is a concrete implementation of a Dictionary.
+
+## Optional
+Beginning with JDK 8, the classes called Optional, OptionalDouble, OptionalInt, and OptionalLong offer a way to handle situations in which a value may or may not be present. These classes are value-based; as such they are immutable.
+
+![alt text](img/img8.png " ")
+![alt text](img/img9.png " ")
+
+One such method is orElse( ). If the object on which it is called contains a value, the value is returned. Otherwise, a default value is returned.
+
+Optional does not define any constructors. Instead, you will use one of its methods to create an instance. For example, you can create an Optional instance with a specified value by using of( ). You can create an instance of Optional that does not contain a value by using empty( ).
+
+The OptionalDouble, OptionalInt, and OptionalLong classes work much like Optional, except that they are designed expressly for use on double, int, and long values, respectively. As such, they specify the methods getAsDouble( ), getAsInt( ), and getAsLong( ), respectively, rather than get( ). Also, they do not support the filter( ), ofNullable( ), map( ), flatMap( ), and or( ) methods.
+
+
+## Serialization
+Serialization is the process of writing the state of an object to a byte stream. This is useful when you want to save the state of your program to a persistent storage area, such as a file. At a later time, you may restore these objects by using the process of deserialization.
+
+Serialization is also needed to implement Remote Method Invocation (RMI). RMI allows a Java object on one machine to invoke a method of a Java object on a different machine. An object may be supplied as an argument to that remote method. The sending machine serializes the object and transmits it. The receiving machine deserializes it.
+
+Assume that an object to be serialized has references to other objects, which, in turn, have references to still more objects. This set of objects and the relationships among them form a directed graph. There may also be circular references within this object graph. That is, object X may contain a reference to object Y, and object Y may contain a reference back to object X. Objects may also contain references to themselves. The object serialization and deserialization facilities have been designed to work correctly in these scenarios. If you attempt to serialize an object at the top of an object graph, all of the other referenced objects are recursively located and serialized. Similarly, during the process of deserialization, all of these objects and their references are correctly restored. It is important to note that serialization and deserialization can impact security, especially as it relates to the deserialization of items that you do not trust.
+
+## Serializable
+Only an object that implements the Serializable interface can be saved and restored by the serialization facilities. The Serializable interface defines no members. It is simply used to indicate that a class may be serialized. If a class is serializable, all of its subclasses are also serializable.
+Variables that are declared as transient are not saved by the serialization facilities. Also, static variables are not saved.
+
+### A Serialization Example
+Note that MyClass is defined to implement the Serializable interface. If this is not done, a NotSerializableException is thrown. Try experimenting with this program by declaring some of the MyClass instance variables to be transient. That data is then not saved during serialization.
+...
+
+
+## Stream Basics
+As a general rule, however, a stream operation by itself does not modify the data source. For example, sorting a stream does not change the order of the source. Rather, sorting a stream results in the creation of a new stream that produces the sorted result.
+
+![alt text](img/img10.png " ")
+![alt text](img/img11.png " ")
+
+In both tables, notice that many of the methods are notated as being either terminal or intermediate. The difference between the two is very important. A terminal operation consumes the stream. It is used to produce a result, such as finding the minimum value in the stream, or to execute some action, as is the case with the forEach( ) method. Once a stream has been consumed, it cannot be reused. Intermediate operations produce another stream. Thus, intermediate operations can be used to create a pipeline that performs a sequence of actions. One other point: intermediate operations do not take place immediately. Instead, the specified action is performed when a terminal operation is executed on the new stream created by an intermediate operation. This mechanism is referred to as lazy behavior, and the intermediate operations are referred to as lazy. The use of lazy behavior enables the stream API to perform more efficiently.
+
+Another key aspect of streams is that some intermediate operations are stateless and some are stateful. In a stateless operation, each element is processed independently of the others. In a stateful operation, the processing of an element may depend on aspects of the other elements. For example, sorting is a stateful operation because an element’s order depends on the values of the other elements. Thus, the sorted( ) method is stateful. However, filtering elements based on a stateless predicate is stateless because each element is handled individually. Thus, filter( ) can (and should be) stateless. The difference between stateless and stateful operations is especially important when parallel processing of a stream is desired because a stateful operation may require more than one pass to complete.
+
+Beginning with JDK 8, the Collection interface was expanded to include two methods that obtain a stream from a collection. The first is stream( ), shown here:
+```Java
+default Stream<E> stream( )
+```
+Its default implementation returns a sequential stream. The second method is
+parallelStream( ), shown next:
+```Java
+default Stream<E> parallelStream( )
+```
+Its default implementation returns a parallel stream, if possible. (If a parallel stream can not be obtained, a sequential stream may be returned instead.) Parallel streams support parallel execution of stream operations.
+
+**Why are Java Streams once-off?**
+
+This question is misguided, because streams are function sequences, not data. Depending on the data source that feeds the stream, you can reset the data source, and feed the same, or different stream.
+
+```Java
+ public static void main(String[] args) {
+    List<Integer> list = List.of(1,2,4,7,3,6,7,8,9,10,5);
+
+    System.out.println("Original List: "+list);
+
+    list.stream().min(Integer::compare).ifPresent(m-> System.out.println("Min is:"+m));
+    list.stream().max(Integer::compare).ifPresent(m-> System.out.println("Max is:"+m));
+
+    System.out.println("Sorted list:" +list.stream().sorted());
+    System.out.println("Even values:"+list.stream().filter(i->i%2==0));
+}
+```
+
+## Reduction Operations
+Consider the min( ) and max( ) methods in the preceding example program. Both are terminal operations that return a result based on the elements in the stream. In the language of the stream API, they represent reduction operations because each reduces a stream to a single value—in this case, the minimum and maximum. However, the stream API generalizes this concept by providing the reduce( ) method. By using reduce( ), you can return a value from a stream based on any arbitrary criteria. By definition, all reduction operations are terminal operations. Stream defines three versions of reduce( ). The two we will use first are shown here:
+```Java
+Optional<T> reduce(BinaryOperator<T> accumulator)
+T reduce(T identityVal, BinaryOperator<T> accumulator)
+```
+The first form returns an object of type Optional, which contains the result. The second form returns an object of type T (which is the element type of the stream). In both forms, accumulator is a function that operates on two values and produces a result. In the second form, identityVal is a value such that an accumulator operation involving identityVal and any element of the stream yields that element, unchanged. For example, if the operation is addition, then the identity value will be 0 because 0 + x is x. For multiplication, the value will be 1, because 1 * x is x.
+
+BinaryOperator is a functional interface declared in java.util.function that extends the BiFunction functional interface. BiFunction defines this abstract method.
+```Java
+R apply(T val, U val2)
+```
+Here, R specifies the result type, T is the type of the first operand, and U is the type of second operand. Thus, apply( ) applies a function to its two operands (val and val2) and returns the result. When BinaryOperator extends BiFunction, it specifies the same type for all the type parameters. Thus, as it relates to BinaryOperator, apply( ) looks like this:
+```Java
+T apply(T val, T val2)
+```
+Furthermore, as it relates to reduce( ), val will contain the previous result and val2 will contain the next element. In its first invocation, val will contain either the identity value or the first element, depending on which version of reduce( ) is used.
+
+It is important to understand that the accumulator operation must satisfy three constraints. It must be
+- Stateless
+- Non-interfering
+- Associative
+
+As explained earlier, stateless means that the operation does not rely on any state information. Thus, each element is processed independently. Non- interfering means that the data source is not modified by the operation. Finally, the operation must be associative. Here, the term associative is used in its normal, arithmetic sense, which means that, given an associative operator used in a sequence of operations, it does not matter which pair of operands are processed first. For example,
+(10 * 2) * 7 yields the same result as 10 * (2 * 7)
+
+The following program demonstrates the versions of reduce( ) just described:
+```Java
+ public static void main(String[] args) {
+    List<Integer> list = List.of(1,2,4,7,3,6,7,8,9,10,5);
+
+    System.out.println("Original List: "+list);
+
+    list.stream().reduce((a,b)->a+b).ifPresent(s->System.out.println("Sum is: "+s)); //62
+
+    int s = list.stream().reduce(5,(a,b)->a+b);
+    System.out.println("Second sum :"+s); //67å
+}
+```
+
+
+## Using Parallel Streams
+Parallel processing of a stream is quite simple to request: just use a parallel stream. As mentioned earlier, one way to obtain a parallel stream is to use the parallelStream( ) method defined by Collection. Another way to obtain a parallel stream is to call the parallel( ) method on a sequential stream. The parallel( ) method is defined by BaseStream, as shown here:
+
+```Java
+S parallel()
+```
+
+It returns a parallel stream based on the sequential stream that invokes it. (If it is called on a stream that is already parallel, then the invoking stream is returned.) Understand, of course, that even with a parallel stream, parallelism will be achieved only if the environment supports it.
+
+As a general rule, any operation applied to a parallel stream must be stateless. It should also be non-interfering and associative. This ensures that the results obtained by executing operations on a parallel stream are the same as those obtained from executing the same operations on a sequential stream. When using parallel streams, you might find the following version of reduce( ) especially helpful. It gives you a way to specify how partial results are combined:
+```Java
+int computedAges = ages.parallelStream().reduce(0, (a, b) -> a + b, Integer::sum);
+```
+
+## Mapping
+Often it is useful to map the elements of one stream to another. For example, a stream that contains a database of name, telephone, and e-mail address information might map only the name and e-mail address portions to another stream. As another example, you might want to apply some transformation to the elements in a stream. To do this, you could map the transformed elements to a new stream. 
+```Java
+public static void main(String[] args) {
+    List<Integer> list = List.of(1,2,4,7,3,6,7,8,9,10,5);
+    System.out.println("Original List: "+list);
+           
+    List s = list.stream().map(a->a*a).collect(Collectors.toList());
+    System.out.println("Map sum :"+s);
+}
+```
+## Use an Iterator with a Stream
+Iterators are objects that implement the Iterator interface declared in java.util. Its two key methods are hasNext( ) and next( ). If there is another element to iterate, hasNext( ) returns true, and false otherwise. The next( ) method returns the next element in the iteration.
+
+## Use Spliterator
+Spliterator offers an alternative to Iterator, especially when parallel processing is involved. In general, Spliterator is more sophisticated than Iterator.
+
+## More to Explore in the Stream API
+To begin, here are a few of the other methods provided by Stream that you will find helpful:
+- To determine if one or more elements in a stream satisfy a specified predicate, use allMatch( ), anyMatch( ), or noneMatch( ).
+- To obtain the number of elements in the stream, call count( ).
+- To obtain a stream that contains only unique elements, use distinct( ).
+- To create a stream that contains a specified set of elements, use of( ).
+
+
+## Servlet
+
+### The Life Cycle of a Servlet
+Three methods are central to the life cycle of a servlet. These are init( ), service( ), and destroy( ). They are implemented by every servlet and are invoked at specific times by the server.
+
+- First, assume that a user enters a Uniform Resource Locator (URL) to a web browser. The browser then generates an HTTP request for this URL. This request is then sent to the appropriate server.
+- Second, this HTTP request is received by the web server. The server maps this request to a particular servlet. The servlet is dynamically retrieved and loaded into the address space of the server.
+- Third, the server invokes the init( ) method of the servlet. This method is invoked only when the servlet is first loaded into memory. It is possible to pass initialization parameters to the servlet so it may configure itself.
+- Fourth, the server invokes the service( ) method of the servlet. This method is called to process the HTTP request. You will see that it is possible for the servlet to read data that has been provided in the HTTP request. It may also formulate an HTTP response for the client.
+The servlet remains in the server’s address space and is available to process any other HTTP requests received from clients. The service( ) method is called for each HTTP request.
+- Finally, the server may decide to unload the servlet from its memory. The algorithms by which this determination is made are specific to each server. The server calls the destroy( ) method to relinquish any resources such as file handles that are allocated for the servlet. Important data may be saved to a persistent store. The memory allocated for the servlet and its objects can then be garbage collected.
+
+
+Inside the servlet, the service( ) method (which is inherited from GenericServlet) is overridden. This method handles requests from a client. Notice that the first argument is a ServletRequest object. This enables the servlet to read data that is provided via the client request. The second argument is a ServletResponse object. This enables the servlet to formulate a response for the client.
+
+- The ServletConfig interface allows a servlet to obtain configuration data when
+it is loaded
+- The ServletContext interface enables servlets to obtain information about their
+environment.
+- The ServletRequest interface enables a servlet to obtain information about a client request.
+- The ServletResponse interface enables a servlet to formulate a response for a client.
+
+
+# Questions
+- Hascode() vs equals()
