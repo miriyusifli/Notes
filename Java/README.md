@@ -414,6 +414,18 @@ All exception types are subclasses of the built-in class Throwable. Thus, Throwa
 
 ![alt text](img/img3.png " ")
 
+| Error                                                    | Exception                                                                              |
+|----------------------------------------------------------|----------------------------------------------------------------------------------------|
+| An error is caused due to lack of system resources.      | An exception is caused because of code                                                 |
+| An error is irrecoverable.                               | An exception is recoverable                                                            |
+| Errors are classified as unchecked type.                 | Exceptions are classified as checked or unchecked type                                 |
+| in java.lang.Errors                                      | in java.lang.Exception                                                                 |
+| java.lang.StackOverflowError, java.lang.OutOfMemoryError | Checked Exceptions : SQLException Unchecked Exceptions : ArrayIndexOutOfBoundException |
+
+**Checked exceptions:** Java checked exceptions are those exceptions, as the name suggests, which a method must handle in its body or throw to the caller method so the caller method can handle it.
+
+**Unchecked exceptions:** In Java, a member method is not forced by the compiler to declare the unchecked exceptions into the method declaration. Generally, such methods almost always do not declare them. 
+
 In some cases, more than one exception could be raised by a single piece of code. To handle this type of situation, you can specify two or more catch clauses, each catching a different type of exception. When an exception is thrown, each catch statement is inspected in order, and the first one whose type matches that of the exception is executed. After one catch statement executes, the others are bypassed, and execution continues after the try / catch block. When you use multiple catch statements, it is important to remember that exception subclasses must come before any of their superclasses. This is because a catch statement that uses a superclass will catch exceptions of that type plus any of its subclasses. Thus, a subclass would never be reached if it came after its superclass. Further, in Java, unreachable code is an error. For example, consider the following program:
                                                            
 ## Multithreaded Programming
