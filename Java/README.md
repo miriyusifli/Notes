@@ -431,9 +431,9 @@ In some cases, more than one exception could be raised by a single piece of code
 ## Multithreaded Programming
 A multithreaded program contains two or more parts that can run concurrently. Each part of such a program is called a thread, and each thread defines a separate path of execution. However, there are two distinct types of multitasking: *process-based* and *thread-based*.
 
-- *process-based multitasking* is the feature that allows your computer to run two or more programs concurrently. For example, process- based multitasking enables you to run the Java compiler at the same time that you are using a text editor or visiting a web site.
+- **process-based multitasking** is the feature that allows your computer to run two or more programs concurrently. For example, process- based multitasking enables you to run the Java compiler at the same time that you are using a text editor or visiting a web site.
 
-- In a *thread-based multitasking *environment, the thread is the smallest unit of dispatchable code. This means that a single program can perform two or more tasks simultaneously. For instance, a text editor can format text at the same time that it is printing, as long as these two actions are being performed by two separate threads
+- In a **thread-based multitasking** environment, the thread is the smallest unit of dispatchable code. This means that a single program can perform two or more tasks simultaneously. For instance, a text editor can format text at the same time that it is printing, as long as these two actions are being performed by two separate threads
 
 Multitasking threads require less overhead than multitasking processes. Processes are heavyweight tasks that require their own separate address spaces. Interprocess communication is expensive and limited. Context switching from one process to another is also costly. Threads, on the other hand, are lighter weight. They share the same address space and cooperatively share the same heavyweight process. Interthread communication is inexpensive, and context switching from one thread to the next is lower in cost. While Java programs make use of process-based multitasking environments, process-based multitasking is not under Java’s direct control.
 
@@ -447,10 +447,13 @@ various shutdown actions.
 Although the main thread is created automatically when your program is started, it can be controlled through a Thread object. To do so, you must obtain a reference to it by calling the method currentThread( ), which is a public static member of Thread.
 
 ### Thread Priorities
-a thread’s priority is used to decide when to switch from one running thread to the next. This is called a context switch. The rules that determine when a context switch takes place are simple:
+a thread’s priority is used to decide when to switch from one running thread to the next. This is called a context switch. 
+A system can achieve concurrency by employing one of the following multitasking models:
 
-- A thread can voluntarily relinquish control. This occurs when explicitly yielding, sleeping, or when blocked. In this scenario, all other threads are examined, and the highest-priority thread that is ready to run is given the CPU.
-- A thread can be preempted by a higher-priority thread. In this case, a lower-priority thread that does not yield the processor is simply preempted—no matter what it is doing—by a higher-priority thread. Basically, as soon as a higher-priority thread wants to run, it does. This is called preemptive multitasking.
+- **Preemptive Multitasking:** In preemptive multitasking, the operating system preempts a program to allow another waiting task to run on the CPU. Programs or threads can't decide how long or when they can use the CPU. The operating system’s scheduler decides which thread or program gets to use the CPU next and for how much time. 
+
+- **Cooperative Multitasking:** Cooperative Multitasking involves well-behaved programs voluntarily giving up control back to the scheduler so that another program can run. A program or thread may give up control after a while has expired or if it becomes idle or logically blocked. The operating system’s scheduler has no say in for how long a program or thread runs. 
+
 
 Thread priorities are used by the thread scheduler to decide when each thread should be allowed to run. In theory, over a given period of time, higher-priority threads get more CPU time than lower-priority threads. In practice, the amount of CPU time that a thread gets often depends on several factors besides its priority.
 
