@@ -924,6 +924,74 @@ Here, T is bounded by a class called MyClass and an interface called MyInterface
 ### Erasure
 In general, here is how erasure works. When your Java code is compiled, all generic type information is removed (erased). This means replacing type parameters with their bound type, which is Object if no explicit bound is specified, and then applying the appropriate casts (as determined by the type arguments) to maintain type compatibility with the types specified by the type arguments. The compiler also enforces this type compatibility. This approach to generics means that no type parameters exist at run time. They are simply a source-code mechanism.
 
+### Ambiguity Errors
+```Java
+//Ambiguity caused by erasure on overload methods
+class MyGenClass <T, V> {
+    T ob1;
+    V ob2;
+
+    //...
+
+    //These two overload methods are ambiguous and will not compile
+    void set(T o){
+        ob1 = o;
+    }
+
+    void set(V o){
+        ob2 = o;
+    }
+}
+```
+
+There are two ambiguity problems here. First, as MyGenClass is written, there is no requirement that T and V actually be different types. For example, it is perfectly correct (in principle) to construct a MyGenClass object as shown here:
+```Java
+MyGenClass<String, String> obj = new MyGenClass<String, String> ()
+```
+In this case, both T and V will be replaced by String. This makes both versions of set( ) identical, which is, of course, an error.
+
+The second and more fundamental problem is that the type erasure of set( ) reduces both versions to the following: Thus, the overloading of set( ) as attempted in MyGenClass is inherently ambiguous.
+
+Ambiguity errors can be tricky to fix. For example, if you know that V will always be some type of Number, you might try to fix MyGenClass by rewriting its declaration as shown here:
+
+```Java
+class MyGenClass<T, V extends Number> { // almost OK!
+```
+This works because Java can accurately determine which method to call. However, ambiguity returns when you try this line:
+```Java
+MyGenClass<Number, Number> x = new MyGenClass<Number, Number>();
+```
+In this case, since both T and V are Number, which version of set( ) is to be called? The call to set( ) is now ambiguous.
+
+Frankly, in the preceding example, it would be much better to use two separate method names, rather than trying to overload set( ). Often, the solution to ambiguity involves the restructuring of the code, because ambiguity frequently means that you have a conceptual error in your design.
+
+### Some Generic Restrictions
+1. Type Parameters Can’t Be Instantiated
+    ```Java
+    class Gen<T>{
+        T ob;
+
+        Gen(){
+            ob = new T(); //Illegal
+        }
+    }
+    ```
+    The reason should be easy to understand: the compiler does not know what type of object to create.
+2. No static member can use a type parameter declared by the enclosing class
+    ```Java
+    class Wrong<T> {
+        //Wrong, no static variables of type T.
+        static T ob;
+
+        //Wrong, no static method can use T.
+        static T getob(){
+            return ob;
+        }
+    }
+    ```
+    Although you can’t declare static members that use a type parameter declared by the enclosing class, you can declare static generic methods, which define their own type parameters, as was done earlier in this chapter.
+3. A generic class cannot extend Throwable. This means that you cannot create generic exception classes.
+
 ## Lambda Expressions
 A lambda expression is, essentially, an anonymous (that is, unnamed) method. The new operator, sometimes referred to as the lambda operator or the arrow operator, is −>. It divides a lambda expression into two parts. The left side specifies any parameters required by the lambda expression. (If no parameters are needed, an empty parameter list is used.) On the right side is the lambda body, which specifies the actions of the lambda expression. The −> can be verbalized as “becomes” or “goes to.” As stated, a functional interface is an interface that specifies only one abstract method.
 
