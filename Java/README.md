@@ -1133,7 +1133,39 @@ Up to this point, the examples in this chapter have defined their own functional
 
 ![alt text](img/img6.png " ")
 
-
+- UnaryOperator<T>
+    ```Java
+    UnaryOperator<Integer> func2 = x -> x * 2;
+    Integer result2 = func2.apply(2);
+    ```
+- BinaryOperator<T>
+    ```Java
+    BinaryOperator<Integer> func2 = (x1, x2) -> x1 + x2;
+    Integer result2 = func.apply(2, 3);
+    ```
+- Consumer<T>
+    ```Java
+    Consumer<String> print = x -> System.out.println(x);
+    print.accept("java"); 
+    ```
+- Supplier<T>
+    ```Java
+    Supplier<LocalDateTime> s = () -> LocalDateTime.now();
+    LocalDateTime time = s.get();
+    ```
+- Function<T,R>
+    ```Java
+    Function<String, Integer> func = x -> x.length();
+    Integer apply = func.apply("mkyong");
+    ```
+- Predicate<T>
+    ```Java
+    Predicate<Integer> noGreaterThan5 =  x -> x > 5;
+    List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    List<Integer> collect = list.stream()
+                                .filter(noGreaterThan5)
+                                .collect(Collectors.toList());
+    ```
 ## The Collections
 
 ### The Collection Interfaces
