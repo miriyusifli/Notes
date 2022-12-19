@@ -1,7 +1,14 @@
 ## Item  1: Consider static factory methods instead of constructors
-One advantage of static factory methods is that, unlike constructors, they have names. A second advantage of static factory methods is that, unlike constructors, they are not required to create a new object each time they’re invoked. A third advantage of static factory methods is that, unlike constructors, they can return an object of any subtype of their return type. A fourth advantage of static factories is that the class of the returned object can vary from call to call as a function of the input parameters. A fifth advantage of static factories is that the class of the returned object need not exist when the class containing the method is written.
+### Advantages
+- One advantage of static factory methods is that, unlike constructors, they have names. 
+- A second advantage of static factory methods is that, unlike constructors, they are not required to create a new object each time they’re invoked. 
+- A third advantage of static factory methods is that, unlike constructors, they can return an object of any subtype of their return type. 
+- A fourth advantage of static factories is that the class of the returned object can vary from call to call as a function of the input parameters. 
+- A fifth advantage of static factories is that the class of the returned object need not exist when the class containing the method is written.
 
-The main limitation of providing only static factory methods is that classes without public or protected constructors cannot be subclassed. A second shortcoming of static factory methods is that they are hard for programmers to find. 
+### Limitations
+- The main limitation of providing only static factory methods is that classes without public or protected constructors cannot be subclassed. 
+- A second shortcoming of static factory methods is that they are hard for programmers to find. 
 
 ## Item  2: Consider a builder when faced with many constructor parameters
 ## Item  3: Enforce the singleton property with a private constructor or an enum type
@@ -39,7 +46,7 @@ public class RomanNumerals {
 Autoboxing blurs but does not erase the distinction between primitive and boxed primitive types. Prefer primitives to boxed primitives, and watch out for unintentional autoboxing.
 
 ## Item  7: Eliminate obsolete object references
-Generally speaking, whenever a class manages its own memory, the pro- grammer should be alert for memory leaks. Whenever an element is freed, any object references contained in the element should be nulled out.
+Generally speaking, whenever a class manages its own memory, the programmer should be alert for memory leaks. Whenever an element is freed, any object references contained in the element should be nulled out.
 
 Another common source of memory leaks is caches. Once you put an object reference into a cache, it’s easy to forget that it’s there and leave it in the cache long after it becomes irrelevant.
 
@@ -54,7 +61,7 @@ The easiest way to avoid problems is not to override the equals method, in which
 - Each instance of the class is inherently unique. This is true for classes such as Thread that represent active entities rather than values. The equals imple- mentation provided by Object has exactly the right behavior for these classes.
 - There is no need for the class to provide a “logical equality” test. For example, java.util.regex.Pattern could have overridden equals to check whether two Pattern instances represented exactly the same regular expression, but the designers didn’t think that clients would need or want this functionality. Under these circumstances, the equals implementation inherited from Object is ideal.
 - A super class has already overridden equals,and the super class behavior is appropriate for this class. For example, most Set implementations inherit their equals implementation from AbstractSet, List implementations from AbstractList, and Map implementations from AbstractMap.
-- The class is private or package-private, and you are certain that its equals method will never be invoked. If you are extremely risk-averse, you can over- ride the equals method to ensure that it isn’t invoked accidentally:
+- The class is private or package-private, and you are certain that its equals method will never be invoked. If you are extremely risk-averse, you can override the equals method to ensure that it isn’t invoked accidentally:
     ```Java
     @Override 
     public boolean equals(Object o) {
@@ -77,7 +84,7 @@ Putting it all together, here’s a recipe for a high-quality equals method:
 1. Use the == operator to check if the argument is a reference to this object. If so, return true. This is just a performance optimization but one that is worth doing if the comparison is potentially expensive.
 2. Use the instanceof operator to check if the argument has the correct type. If not, return false. Typically, the correct type is the class in which the method occurs. Occasionally, it is some interface implemented by this class. Use an interface if the class implements an interface that refines the equals contract to permit comparisons across classes that implement the interface. Collection interfaces such as Set, List, Map, and Map.Entry have this property.
 3. Cast the argument to the correct type. Because this cast was preceded by an instanceof test, it is guaranteed to succeed.
-4. For each “significant” field in the class, check if that field of the argument matches the corresponding field of this object. If all these tests succeed, re- turn true; otherwise, return false. 
+4. For each “significant” field in the class, check if that field of the argument matches the corresponding field of this object. If all these tests succeed, return true; otherwise, return false. 
 
 ## Item  11: Always override hashCode when you override equals
 Here is the contract:
@@ -88,15 +95,17 @@ Here is the contract:
 
 A good hash function tends to produce unequal hash codes for unequal instances. Luckily it’s not too hard to achieve a fair approximation. Here is a simple recipe:
 1. Declare an int variable named result, and initialize it to the hash code c for the first significant field in your object, as computed in step 2.a. (Recall from Item 10 that a significant field is a field that affects equals comparisons.)
-2. For every remaining significant field f in your object, do the following: a. Compute an int hash code c for the field:
-i. If the field is of a primitive type, compute Type.hashCode(f), where Type is the boxed primitive class corresponding to f’ s type.
-ii. If the field is an object reference and this class’s equals method compares the field by recursively invoking equals, recursively invoke hashCode on the field. If a more complex comparison is required, compute a “canonical representation” for this field and invoke hashCode on the canonical representation. If the value of the field is null, use 0 (or some other constant, but 0 is traditional).
-iii. If the field is an array, treat it as if each significant element were a separate field. That is, compute a hash code for each significant element by applying these rules recursively, and combine the values per step 2.b. If the array has no significant elements, use a constant, preferably not 0. If all elements are significant, use Arrays.hashCode.
-b. Combine the hash code c computed in step 2.a into result as follows: result = 31 * result + c;
+2. For every remaining significant field f in your object, do the following: 
+- a. Compute an int hash code c for the field:
+   - i. If the field is of a primitive type, compute Type.hashCode(f), where Type is the boxed primitive class corresponding to f’ s type.
+   - ii. If the field is an object reference and this class’s equals method compares the field by recursively invoking equals, recursively invoke hashCode on the field. If a more complex comparison is required, compute a “canonical representation” for this field and invoke hashCode on the canonical representation. If the value of the field is null, use 0 (or some other constant, but 0 is traditional).
+   - iii. If the field is an array, treat it as if each significant element were a separate field. That is, compute a hash code for each significant element by applying these rules recursively, and combine the values per step 
+- b. If the array has no significant elements, use a constant, preferably not 0. If all elements are significant, use Arrays.hashCode.
+b. Combine the hash code c computed in step 2.a into result as follows: `result = 31 * result + c;`
 3. Return result.
 
 
-The Objects class has a static method that takes an arbitrary number of objects and returns a hash code for them. This method, named hash, lets you write one-line hashCode methods whose quality is comparable to those written accord- ing to the recipe in this item. Unfortunately, they run more slowly because they entail array creation to pass a variable number of arguments, as well as boxing and unboxing if any of the arguments are of primitive type. This style of hash function is recommended for use only in situations where performance is not critical. Here is a hash function for PhoneNumber written using this technique:
+The Objects class has a static method that takes an arbitrary number of objects and returns a hash code for them. This method, named hash, lets you write one-line hashCode methods whose quality is comparable to those written according to the recipe in this item. Unfortunately, they run more slowly because they entail array creation to pass a variable number of arguments, as well as boxing and unboxing if any of the arguments are of primitive type. This style of hash function is recommended for use only in situations where performance is not critical. Here is a hash function for PhoneNumber written using this technique:
 ```Java
 // One-line hashCode method - mediocre performance
 @Override
@@ -126,13 +135,13 @@ A better approach to object copying is to provide a copy constructor or copy fac
 
 ## Item 14: Consider implementing Comparable
 The general contract of the compareTo method is similar to that of equals:
-- The implementor must ensure that sgn(x.compareTo(y))==-sgn(y. compareTo(x)) for all x and y. (This implies that x.compareTo(y) must throw an exception if and only if y.compareTo(x) throws an exception.)
-- The implementor must also ensure that the relation is transitive: (x. compareTo(y) > 0 && y.compareTo(z) > 0) implies x.compareTo(z) > 0.
-- Finally, implementor must ensure that x.compareTo(y)==0impliesthat sgn(x.compareTo(z)) == sgn(y.compareTo(z)), for all z.
-- It is strongly recommended, but not required, that (x.compareTo(y) == 0) == (x.equals(y)). Generally speaking, any class that implements the Comparable interface and violates this condition should clearly indicate this fact. The recommended language is “Note: This class has a natural ordering that is inconsistent with equals.”
+- The implementor must ensure that `sgn(x.compareTo(y))==-sgn(y. compareTo(x))` for all `x` and `y`. (This implies that `x.compareTo(y)` must throw an exception if and only if `y.compareTo(x)` throws an exception.)
+- The implementor must also ensure that the relation is transitive: `(x. compareTo(y) > 0 && y.compareTo(z) > 0)` implies `x.compareTo(z) > 0`.
+- Finally, implementor must ensure that `x.compareTo(y)==0` implies that `sgn(x.compareTo(z)) == sgn(y.compareTo(z))`, for all `z`.
+- It is strongly recommended, but not required, that `(x.compareTo(y) == 0) == (x.equals(y))`. Generally speaking, any class that implements the Comparable interface and violates this condition should clearly indicate this fact. The recommended language is “Note: This class has a natural ordering that is inconsistent with equals.”
 
 
-Writing a compareTo method is similar to writing an equals method, but there are a few key differences. Because the Comparable interface is parameter- ized, the compareTo method is statically typed, so you don’t need to type check or cast its argument. If the argument is of the wrong type, the invocation won’t even compile. If the argument is null, the invocation should throw a NullPointer- Exception, and it will, as soon as the method attempts to access its members.
+Writing a compareTo method is similar to writing an equals method, but there are a few key differences. Because the Comparable interface is parameterized, the compareTo method is statically typed, so you don’t need to type check or cast its argument. If the argument is of the wrong type, the invocation won’t even compile. If the argument is null, the invocation should throw a NullPointerException, and it will, as soon as the method attempts to access its members.
 
 In a compareTo method, fields are compared for order rather than equality. To compare object reference fields, invoke the compareTo method recursively. If a field does not implement Comparable or you need a nonstandard ordering, use a Comparator instead. You can write your own comparator or use an existing one, as in this compareTo method for CaseInsensitiveString in Item 10:
 ```Java
@@ -159,9 +168,9 @@ If a class has multiple significant fields, the order in which you compare them 
 }
 ```
 ## Item  15: Minimize the accessibility of classes and members
-It is wrong for a class to have a public static final array field, or an accessor that returns such a field. If a class has such a field or accessor, clients will be able to modify the con- tents of the array. 
+It is wrong for a class to have a public static final array field, or an accessor that returns such a field. If a class has such a field or accessor, clients will be able to modify the contents of the array. 
 
-## Item 16: Inpublicclasses,use accessor methods,not public fields
+## Item 16: In public classes, use accessor methods,not public fields
 ## Item 17: Minimize mutability
 To make a class immutable, follow these five rules:
 1. Don’t provide methods that modify the object’s state (known as mutators).
@@ -170,7 +179,7 @@ To make a class immutable, follow these five rules:
 4. Make all fields private. This prevents clients from obtaining access to mutable objects referred to by fields and modifying these objects directly. While it is technically permissible for immutable classes to have public final fields containing primitive values or references to immutable objects, it is not recommended because it precludes changing the internal representation in a later release (Items 15 and 16).
 5. Ensure exclusive access to any mutable components. If your class has any fields that refer to mutable objects, ensure that clients of the class cannot obtain references to these objects. Never initialize such a field to a client-provided object reference or return the field from an accessor. Make defensive copies (Item 50) in constructors, accessors, and readObject methods (Item 88).
 
-Immutable objects are inherently thread-safe; they require no synchroni- zation. They cannot be corrupted by multiple threads accessing them concur- rently. This is far and away the easiest approach to achieve thread safety. 
+Immutable objects are inherently thread-safe; they require no synchronization. They cannot be corrupted by multiple threads accessing them concurrently. This is far and away the easiest approach to achieve thread safety. 
 
 The major disadvantage of immutable classes is that they require a separate object for each distinct value.
 
@@ -225,11 +234,11 @@ public class InstrumentedHashSet<E> extends HashSet<E> {
     }
 }
 ```
-Internally, HashSet’s addAll method is imple- mented on top of its add method, although HashSet, quite reasonably, does not document this implementation detail. The addAll method in Instrumented- HashSet added three to addCount and then invoked HashSet’s addAll implemen- tation using super.addAll. This in turn invoked the add method, as overridden in InstrumentedHashSet, once for each element. It would be slightly better to override the addAll method to iterate over the specified collection, calling the add method once for each element. This would guarantee the correct result whether or not HashSet’s addAll method were implemented atop its add method because HashSet’s addAll implementation would no longer be invoked
+Internally, `HashSet`’s `addAll` method is implemented on top of its `add` method, although `HashSet`, quite reasonably, does not document this implementation detail. The `addAll` method in `InstrumentedHashSet` added three to `addCount` and then invoked `HashSet`’s `addAll` implementation using `super.addAll`. This in turn invoked the `add` method, as overridden in `InstrumentedHashSet`, once for each element. It would be slightly better to override the `addAll` method to iterate over the specified collection, calling the `add` method once for each element. This would guarantee the correct result whether or not `HashSet`’s `addAll` method were implemented atop its `add` method because `HashSet`’s `addAll` implementation would no longer be invoked
 
 A related cause of fragility in subclasses is that their superclass can acquire new methods in subsequent releases. Suppose a program depends for its security on the fact that all elements inserted into some collection satisfy some predicate. This can be guaranteed by subclassing the collection and overriding each method capable of adding an element to ensure that the predicate is satisfied before adding the element. This works fine until a new method capable of inserting an element is added to the superclass in a subsequent release. Once this happens, it becomes possible to add an “illegal” element merely by invoking the new method, which is not overridden in the subclass. This is not a purely theoretical problem. Several security holes of this nature had to be fixed when Hashtable and Vector were ret- rofitted to participate in the Collections Framework.
 
-Luckily, there is a way to avoid all of the problems described above. Instead of extending an existing class, give your new class a private field that references an instance of the existing class. This design is called composition because the exist- ing class becomes a component of the new one. 
+Luckily, there is a way to avoid all of the problems described above. Instead of extending an existing class, give your new class a private field that references an instance of the existing class. This design is called composition because the existing class becomes a component of the new one. 
 ```Java
 // Wrapper class - uses composition in place of inheritance
 public class InstrumentedSet<E> extends ForwardingSet<E> {
@@ -297,13 +306,12 @@ public class ForwardingSet<E> implements Set<E> {
     }
 }
 ```
-Inheritance is appropriate only in circumstances where the subclass really is a subtype of the superclass. In other words, a class B should extend a class A only if an “is-a” relationship exists between the two classes. If you are tempted to have a class B extend a class A, ask yourself the question: Is every B really an A? If you cannot truthfully answer yes to this question, B should not extend A. If the answer is no, it is often the case that B should contain a private instance of A and expose a different API: A is not an essential part of B, merely a detail of its implementation. If you use inheritance where composition is appropriate, you needlessly expose implementation details. For example, if p refers to a Properties instance, then p.getProperty(key) may yield different results from p.get(key): the for- mer method takes defaults into account, while the latter method, which is inher- ited from Hashtable, does not.
+Inheritance is appropriate only in circumstances where the subclass really is a subtype of the superclass. In other words, a class B should extend a class A only if an “is-a” relationship exists between the two classes. If you are tempted to have a class B extend a class A, ask yourself the question: Is every B really an A? If you cannot truthfully answer yes to this question, B should not extend A. If the answer is no, it is often the case that B should contain a private instance of A and expose a different API: A is not an essential part of B, merely a detail of its implementation. If you use inheritance where composition is appropriate, you needlessly expose implementation details. For example, if p refers to a Properties instance, then p.getProperty(key) may yield different results from p.get(key): the former method takes defaults into account, while the latter method, which is inherited from Hashtable, does not.
 
 To summarize, inheritance is powerful, but it is problematic because it violates encapsulation. It is appropriate only when a genuine subtype relationship exists between the subclass and the superclass. Even then, inheritance may lead to fragility if the subclass is in a different package from the superclass and the superclass is not designed for inheritance. To avoid this fragility, use composition and forwarding instead of inheritance, especially if an appropriate interface to implement a wrapper class exists. Not only are wrapper classes more robust than subclasses, they are also more powerful.
 
 ## Item 19: Design and document for inheritance or else prohibit it
-The superclass constructor runs before the subclass constructor, so the overriding method in the subclass will get invoked before the subclass constructor has run.
-Note that it is safe to invoke private methods, final methods, and static meth- ods, none of which are overridable, from a constructor. The Cloneable and Serializable interfaces present special difficulties when designing for inheritance. If you do decide to implement either Cloneable or Serializable in a class that is designed for inheritance, you should be aware that because the clone and readObject methods behave a lot like constructors, a similar restriction applies: neither clone nor readObject may invoke an overridable method, directly or indirectly. In the case of readObject, the overriding method will run before the subclass’s state has been deserialized. In the case of clone, the overriding method will run before the subclass’s clone method has a chance to fix the clone’s state. Finally, if you decide to implement Serializable in a class designed for inheritance and the class has a readResolve or writeReplace method, you must make the readResolve or writeReplace method protected rather than private. If these methods are private, they will be silently ignored by subclasses.
+The superclass constructor runs before the subclass constructor, so the overriding method in the subclass will get invoked before the subclass constructor has run. Note that it is safe to invoke private methods, final methods, and static methods, none of which are overridable, from a constructor. The Cloneable and Serializable interfaces present special difficulties when designing for inheritance. If you do decide to implement either Cloneable or Serializable in a class that is designed for inheritance, you should be aware that because the clone and readObject methods behave a lot like constructors, a similar restriction applies: neither clone nor readObject may invoke an overridable method, directly or indirectly. In the case of readObject, the overriding method will run before the subclass’s state has been deserialized. In the case of clone, the overriding method will run before the subclass’s clone method has a chance to fix the clone’s state. Finally, if you decide to implement Serializable in a class designed for inheritance and the class has a readResolve or writeReplace method, you must make the readResolve or writeReplace method protected rather than private. If these methods are private, they will be silently ignored by subclasses.
 
 ## Item 20: Prefer interfaces to abstract classes
 
