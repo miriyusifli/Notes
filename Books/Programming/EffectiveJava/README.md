@@ -317,13 +317,13 @@ The superclass constructor runs before the subclass constructor, so the overridi
 
 Existing classes can easily be retrofitted to implement a new interface. If you want to have two classes extend the same abstract class, you have to place it high up in the type hierarchy where it is an ancestor of both classes. Unfortunately, this can cause great collateral damage to the type hierarchy, forcing all descendants of the new abstract class to subclass it, whether or not it is appropriate. Although many interfaces specify the behavior of Object methods such as equals and hashCode, you are not permitted to provide default methods for them. Also, interfaces are not permitted to contain instance fields or nonpublic static members (with the exception of private static methods). Finally, you can’t add default methods to an interface that you don’t control.
 
-## Item 21: Designinterfacesforposterity
-It is not always possible to write a default method that maintains all invariants of every conceivable implementation. In the presence of default methods, existing implementations of an inter- face may compile without error or warning but fail at runtime.
+## Item 21: Design interfaces for posterity
+It is not always possible to write a default method that maintains all invariants of every conceivable implementation. In the presence of default methods, existing implementations of an interface may compile without error or warning but fail at runtime.
 
 Using default methods to add new methods to existing interfaces should be avoided unless the need is critical, in which case you should think long and hard about whether an existing interface implementation might be broken by your default method implementation. 
 
-## Item 22: Useinterfacesonlytodefinetypes
-One kind of interface that fails this test is the so-called constant interface. Such an interface contains no methods; it consists solely of static final fields, each exporting a constant. The constant interface pattern is a poor use of interfaces. That a class uses some constants internally is an implementation detail. Implementing a constant interface causes this implementation detail to leak into the class’s exported API. It is of no consequence to the users of a class that the class implements a constant interface. In fact, it may even confuse them. If you want to export constants, there are several reasonable choices. If the constants are strongly tied to an existing class or interface, you should add them to the class or interface. For example, all of the boxed numerical primitive classes, such as Integer and Double, export MIN_VALUE and MAX_VALUE constants. If the constants are best viewed as members of an enumerated type, you should export them with an enum type (Item 34). Otherwise, you should export the constants with a noninstantiable utility class (Item 4). Here is a utility class version of the PhysicalConstants example shown earlier:
+## Item 22: Use interfaces only to define types
+One kind of interface that fails this test is the so-called constant interface. Such an interface contains no methods; it consists solely of static final fields, each exporting a constant. The constant interface pattern is a poor use of interfaces. That a class uses some constants internally is an implementation detail. Implementing a constant interface causes this implementation detail to leak into the class’s exported API. It is of no consequence to the users of a class that the class implements a constant interface. In fact, it may even confuse them. If you want to export constants, there are several reasonable choices. If the constants are strongly tied to an existing class or interface, you should add them to the class or interface. For example, all of the boxed numerical primitive classes, such as `Integer` and `Double`, export `MIN_VALUE` and `MAX_VALUE` constants. If the constants are best viewed as members of an enumerated type, you should export them with an enum type (Item 34). Otherwise, you should export the constants with a noninstantiable utility class (Item 4). Here is a utility class version of the PhysicalConstants example shown earlier:
 ```Java
  // Constant utility class
 package com.effectivejava.science;
@@ -341,7 +341,7 @@ Occasionally you may run across a class whose instances come in two or more flav
 
 ## Item 24: Favor static member classes over nonstatic
 There are four kinds of nested classes: static member classes, nonstatic member classes, anonymous classes, and local classes. 
-A common use of private static member classes is to represent components of the object represented by their enclosing class. For example, consider a Map instance, which associates keys with values. Many Map implementations have an internal Entry object for each key-value pair in the map. To recap, there are four different kinds of nested classes, and each has its place. If a nested class needs to be visible outside of a single method or is too long to fit comfortably inside a method, use a member class. If each instance of a mem- ber class needs a reference to its enclosing instance, make it nonstatic; otherwise, make it static. Assuming the class belongs inside a method, if you need to create instances from only one location and there is a preexisting type that characterizes the class, make it an anonymous class; otherwise, make it a local class.
+A common use of private static member classes is to represent components of the object represented by their enclosing class. For example, consider a Map instance, which associates keys with values. Many Map implementations have an internal Entry object for each key-value pair in the map. To recap, there are four different kinds of nested classes, and each has its place. If a nested class needs to be visible outside of a single method or is too long to fit comfortably inside a method, use a member class. If each instance of a member class needs a reference to its enclosing instance, make it nonstatic; otherwise, make it static. Assuming the class belongs inside a method, if you need to create instances from only one location and there is a preexisting type that characterizes the class, make it an anonymous class; otherwise, make it a local class.
 
 ## Item25: Limit source files to a single top-level class
 
@@ -359,7 +359,7 @@ If you use this declaration today and then accidentally put a coin into your sta
 for (Iterator i = stamps.iterator(); i.hasNext(); )
 Stamp stamp = (Stamp) i.next(); // Throws ClassCastException stamp.cancel();
 ```
-If you use raw types, you lose all the safety and expressiveness benefits of generics. While you shouldn’t use raw types such as List, it is fine to use types that are parameterized to allow insertion of arbitrary objects, such as List<Object>. Just what is the difference between the raw type List and the parameterized type List<Object>? Loosely speaking, the former has opted out of the generic type system, while the latter has explicitly told the compiler that it is capable of holding objects of any type. While you can pass a List<String> to a parameter of type List, you can’t pass it to a parameter of type List<Object>. There are subtyping rules for generics, and List<String> is a subtype of the raw type List, but not of the parameterized type List<Object> (Item 28). As a consequence, you lose type safety if you use a raw type such as List, but not if you use a parameterized type such as List<Object>. To make this concrete, consider the following program:
+If you use raw types, you lose all the safety and expressiveness benefits of generics. While you shouldn’t use raw types such as List, it is fine to use types that are parameterized to allow insertion of arbitrary objects, such as List<Object>. Just what is the difference between the raw type List and the parameterized type List<Object>? Loosely speaking, the former has opted out of the generic type system, while the latter has explicitly told the compiler that it is capable of holding objects of any type. While you can pass a `List<String>` to a parameter of type List, you can’t pass it to a parameter of type `List<Object>`. There are subtyping rules for generics, and `List<String>` is a subtype of the raw type List, but not of the parameterized type `List<Object>` (Item 28). As a consequence, you lose type safety if you use a raw type such as List, but not if you use a parameterized type such as `List<Object>`. To make this concrete, consider the following program:
 ```Java
  // Fails at runtime - unsafeAdd method uses a raw type (List)!
 public static void main(String[] args) {
@@ -372,8 +372,8 @@ private static void unsafeAdd(List list, Object o) {
     list.add(o);
 }
 ```
-This program compiles, but because it uses the raw type List, you get a warning. And indeed, if you run the program, you get a ClassCastException when the program tries to cast the result of the invocation strings.get(0), which is an Integer, to a String. This is a compiler-generated cast, so it’s normally guaranteed to succeed, but in this case we ignored a compiler warning and paid the price.
-If you replace the raw type List with the parameterized type List<Object> in the unsafeAdd declaration and try to recompile the program, you’ll find that it no longer compiles but emits the error message. 
+This program compiles, but because it uses the raw type List, you get a warning. And indeed, if you run the program, you get a `ClassCastException` when the program tries to cast the result of the invocation `strings.get(0)`, which is an Integer, to a String. This is a compiler-generated cast, so it’s normally guaranteed to succeed, but in this case we ignored a compiler warning and paid the price.
+If you replace the raw type List with the parameterized type `List<Object>` in the unsafeAdd declaration and try to recompile the program, you’ll find that it no longer compiles but emits the error message. 
 
 ```
 Test.java:5: error: incompatible types: List<String> cannot be
@@ -382,7 +382,7 @@ Test.java:5: error: incompatible types: List<String> cannot be
                  ^
 ```                 
 
-What is the difference between the unbounded wildcard type Set<?> and the raw type Set? Does the question mark really buy you anything? Not to belabor the point, but the wildcard type is safe and the raw type isn’t. You can put any element into a collection with a raw type, easily corrupting the collection’s type invariant (as demonstrated by the unsafeAdd method on page 119); you can’t put any ele- ment (other than null) into a Collection<?>. Attempting to do so will generate a compile-time error message like this:
+What is the difference between the unbounded wildcard type `Set<?>` and the raw type Set? Does the question mark really buy you anything? Not to be labor the point, but the wildcard type is safe and the raw type isn’t. You can put any element into a collection with a raw type, easily corrupting the collection’s type invariant (as demonstrated by the unsafeAdd method on page 119); you can’t put any element (other than null) into a `Collection<?>`. Attempting to do so will generate a compile-time error message like this:
 
 ```
 WildCard.java:13: error: incompatible types: String cannot be
@@ -393,7 +393,7 @@ WildCard.java:13: error: incompatible types: String cannot be
        CAP#1 extends Object from capture of ?
 ```
 ## Item27: Eliminate unchecked warnings
-Eliminate every unchecked warning that you can. If you can’t eliminate a warning, but you can prove that the code that provoked the warning is typesafe, then (and only then) suppress the warning with an @SuppressWarnings("unchecked") annotation. Always use the SuppressWarnings annotation on the smallest scope possible. 
+Eliminate every unchecked warning that you can. If you can’t eliminate a warning, but you can prove that the code that provoked the warning is typesafe, then (and only then) suppress the warning with an `@SuppressWarnings("unchecked")` annotation. Always use the SuppressWarnings annotation on the smallest scope possible. 
 
 ## Item 28: Prefer lists to arrays
 ```Java
@@ -407,7 +407,7 @@ objectArray[0] = "I don't fit in"; // Throws ArrayStoreException
 List<Object> ol = new ArrayList<Long>(); // Incompatible types 
 ol.add("I don't fit in");
 ```
-Either way you can’t put a String into a Long container, but with an array you find out that you’ve made a mistake at runtime; with a list, you find out at compile time. Of course, you’d rather find out at compile time. it is illegal to create an array of a generic type, a parameterized type, or a type parameter. Therefore, none of these array creation expressions are legal: new List<E>[], new List<String>[], new E[]. All will result in generic array creation errors at compile time.
+Either way you can’t put a String into a Long container, but with an array you find out that you’ve made a mistake at runtime; with a list, you find out at compile time. Of course, you’d rather find out at compile time. it is illegal to create an array of a generic type, a parameterized type, or a type parameter. Therefore, none of these array creation expressions are legal: `new List<E>[], new List<String>[], new E[]`. All will result in generic array creation errors at compile time.
 ```Java
 // Why generic array creation is illegal - won't compile! 
 List<String>[] stringLists = new List<String>[1]; // (1)
@@ -416,7 +416,7 @@ Object[] objects = stringLists; // (3)
 objects[0] = intList; // (4)
 String s = stringLists[0].get(0); // (5)
 ```
-Let’s pretend that line 1, which creates a generic array, is legal. Line 2 creates and initializes a List<Integer> containing a single element. Line 3 stores the List<String> array into an Object array variable, which is legal because arrays are covariant. Line 4 stores the List<Integer> into the sole element of the Object array, which succeeds because generics are implemented by erasure: the runtime type of a List<Integer> instance is simply List, and the runtime type of a List<String>[] instance is List[], so this assignment doesn’t generate an ArrayStoreException. Now we’re in trouble. We’ve stored a List<Integer> instance into an array that is declared to hold only List<String> instances. In line 5, we retrieve the sole element from the sole list in this array. The compiler automatically casts the retrieved element to String, but it’s an Integer, so we get a ClassCastException at runtime. In order to prevent this from happening, line 1 (which creates a generic array) must generate a compile-time error.
+Let’s pretend that line 1, which creates a generic array, is legal. Line 2 creates and initializes a `List<Integer>` containing a single element. Line 3 stores the `List<String>` array into an Object array variable, which is legal because arrays are covariant. Line 4 stores the `List<Integer>` into the sole element of the Object array, which succeeds because generics are implemented by erasure: the runtime type of a `List<Integer>` instance is simply List, and the runtime type of a `List<String>[]` instance is `List[]`, so this assignment doesn’t generate an `ArrayStoreException`. Now we’re in trouble. We’ve stored a `List<Integer>` instance into an array that is declared to hold only `List<String>` instances. In line 5, we retrieve the sole element from the sole list in this array. The compiler automatically casts the retrieved element to String, but it’s an Integer, so we get a `ClassCastException` at runtime. In order to prevent this from happening, line 1 (which creates a generic array) must generate a compile-time error.
 
 ## Item 29: Favor generic types
 ## Item 30: Favor generic methods
@@ -424,7 +424,7 @@ Let’s pretend that line 1, which creates a generic array, is legal. Line 2 cre
 ## Item 32: Combine generics and varargs judiciously
 ## Item 33: Consider type safe heterogeneous containers
 ## Item 34: Use enums instead of int constants
-There is no easy way to translate int enum constants into printable strings. If you print such a constant or display it from a debugger.  Because clients can neither create instances of an enum type nor extend it, there can be no instances but the declared enum constants. To associate data with enum constants, declare instance fields and write a constructor that takes the data and stores it in the fields. Enums are by their nature immutable, so all fields should be final (Item 17). Fields can be public, but it is better to make them private and provide public accessors. Luckily, there is a better way to associate a different behavior with each enum constant: declare an abstract apply method in the enum type, and override it with a concrete method for each constant in a constant-specific class body. Such meth- ods are known as constant-specific method implementations:
+There is no easy way to translate int enum constants into printable strings. If you print such a constant or display it from a debugger.  Because clients can neither create instances of an enum type nor extend it, there can be no instances but the declared enum constants. To associate data with enum constants, declare instance fields and write a constructor that takes the data and stores it in the fields. Enums are by their nature immutable, so all fields should be final (Item 17). Fields can be public, but it is better to make them private and provide public accessors. Luckily, there is a better way to associate a different behavior with each enum constant: declare an abstract apply method in the enum type, and override it with a concrete method for each constant in a constant-specific class body. Such methods are known as constant-specific method implementations:
 ```Java
  // Enum type with constant-specific method implementations
 public enum Operation {
@@ -436,7 +436,7 @@ public enum Operation {
     public abstract double apply(double x, double y);
 }
 ```
-In the unlikely event that you do forget, the compiler will remind you because abstract methods in an enum type must be over- ridden with concrete methods in all of its constants. 
+In the unlikely event that you do forget, the compiler will remind you because abstract methods in an enum type must be overridden with concrete methods in all of its constants. 
 
 What you really want is to be forced to choose an overtime pay strategy each time you add an enum constant. Luckily, there is a nice way to achieve this. The idea is to move the overtime pay computation into a private nested enum, and to pass an instance of this strategy enum to the constructor for the PayrollDay enum. The PayrollDay enum then delegates the overtime pay calculation to the strategy enum, eliminating the need for a switch statement or constant-specific method implementation in PayrollDay. While this pattern is less concise than the switch statement, it is safer and more flexible:
 
@@ -480,10 +480,10 @@ enum PayrollDay {
     }
 }
 ```
-Use enums any time you need a set of con- stants whose members are known at compile time. It is not necessary that the set of constants in an enum type stay fixed for all time.
+Use enums any time you need a set of constants whose members are known at compile time. It is not necessary that the set of constants in an enum type stay fixed for all time.
 
 ## Item35: Use instance fields instead of ordinals
-All enums have an ordinal method, which returns the numerical position of each enum constant in its type. You may be tempted to derive an associated int value from the ordinal. While this enum works, it is a maintenance nightmare. If the constants are reordered, the numberOfMusicians method will break.
+All enums have an ordinal method, which returns the numerical position of each enum constant in its type. You may be tempted to derive an associated int value from the ordinal. While this enum works, it is a maintenance nightmare. If the constants are reordered, the `numberOfMusicians` method will break.
 
 ```Java
 // Abuse of ordinal to derive an associated value - DON'T DO THIS
@@ -498,7 +498,7 @@ Never derive a value associated with an enum from its ordinal; store it in an in
 ## Item 36: Use EnumSet instead of bit fields
 ## Item 37: Use EnumMap instead of ordinal indexing
 ## Item 38: Emulate extensible enums with interfaces
-That said, there is at least one compelling use case for extensible enumerated types, which is operation codes, also known as opcodes. An opcode is an enumer- ated type whose elements represent operations on some machine, such as the Operation type in Item 34, which represents the functions on a simple calculator. Sometimes it is desirable to let the users of an API provide their own operations, effectively extending the set of operations provided by the API. Luckily, there is a nice way to achieve this effect using enum types. The basic idea is to take advantage of the fact that enum types can implement arbitrary inter- faces by defining an interface for the opcode type and an enum that is the standard implementation of the interface. For example, here is an extensible version of the Operation type from Item 34:
+That said, there is at least one compelling use case for extensible enumerated types, which is operation codes, also known as opcodes. An opcode is an enumerated type whose elements represent operations on some machine, such as the Operation type in Item 34, which represents the functions on a simple calculator. Sometimes it is desirable to let the users of an API provide their own operations, effectively extending the set of operations provided by the API. Luckily, there is a nice way to achieve this effect using enum types. The basic idea is to take advantage of the fact that enum types can implement arbitrary interfaces by defining an interface for the opcode type and an enum that is the standard implementation of the interface. For example, here is an extensible version of the Operation type from Item 34:
 ```Java
 // Emulated extensible enum using an interface
 public interface Operation {
@@ -555,7 +555,7 @@ You can now use your new operations anywhere you could use the basic oper- ation
 
 ## Item 39: Prefer annotations to naming patterns
 ## Item 40: Consistently use the Override annotation
-Luckily, the compiler can help you find non-overriden methods which are intented to be overriden, but only if you help it by telling it that you intend to override. Use the Override annotation on every method decla- ration that you believe to override a superclass declaration. 
+Luckily, the compiler can help you find non-overriden methods which are intented to be overriden, but only if you help it by telling it that you intend to override. Use the Override annotation on every method declaration that you believe to override a superclass declaration. 
 
 ## Item 41: Use marker interfaces to define types
 First and foremost, marker interfaces define a type that is implemented by instances of the marked class; marker annotations do not. The existence of a marker interface type allows you to catch errors at compile time that you couldn’t catch until runtime if you used a marker annotation. Java’s serialization facility (Chapter 6) uses the Serializable marker inter- face to indicate that a type is serializable. The ObjectOutputStream.writeObject method, which serializes the object that is passed to it, requires that its argument be serializable. Had the argument of this method been of type Serializable, an attempt to serialize an inappropriate object would have been detected at compile time (by type checking). Another advantage of marker interfaces over marker annotations is that they can be targeted more precisely.
