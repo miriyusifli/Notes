@@ -183,3 +183,99 @@ It is also possible to call subscribe with a regular expression. The expression 
 If your Kafka cluster has large number of partitions, perhaps 30,000 or more, you should be aware that the filtering of topics for the subscription is done on the client side. This means that when you subscribe to a subset of topics via a regular expression rather than via an explicit list, the consumer will request the list of all topics and their partitions from the broker in regular intervals. The client will then use this list to detect new topics that it should include in its subscription and subscribe to them. When the topic list is large and there are many consumers, the size of the list of topics and partitions is significant, and the regular expression subscription has significant overhead on the broker, client, and network. There are cases where the bandwidth used by the topic metadata is larger than the bandwidth used to send data. This also means that in order to subscribe with a regular expression, the client needs permissions to describe all topics in the cluster—that is, a full describe grant on the entire cluster.
 
 ## The Poll Loop
+In Apache Kafka, the poll loop is a central part of the Kafka consumer. It is a loop that runs in the background, repeatedly calling the poll() method on the consumer to retrieve new records from the Kafka broker.
+
+Here is a simplified version of the poll loop:
+```Java
+while (true) {
+    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+    for (ConsumerRecord<String, String> record : records) {
+        // Process the record
+    }
+}
+```
+The `poll()` method retrieves a batch of records from the Kafka broker. If there are no new records available, the `poll()` method will block for a specified amount of time (in this case, 100 milliseconds) before returning an empty batch of records. If the poll() method finds new records in the Kafka broker within 56 milliseconds, it will return those records to the consumer and the poll loop will continue to the next iteration. The `poll()` method will not block for the full 100 milliseconds in this case, because it has found the records it was waiting for. This helps to reduce the CPU usage of the consumer by not constantly polling the broker when there are no new records to process.
+
+The poll loop will continue running indefinitely, until the consumer is shut down or the thread is interrupted.
+
+In Apache Kafka, the poll loop is implemented in the KafkaConsumer class. The KafkaConsumer class provides a `poll()` method that can be called by the user to retrieve a batch of records from the Kafka broker. However, the poll loop itself is not called directly by the user.
+
+Instead, the KafkaConsumer class starts the poll loop when the `subscribe()` or `assign()` method is called, which tells the consumer to start consuming records from one or more topics. The `subscribe()` and `assign()` methods start a background thread that runs the poll loop in the consumer, continuously calling the `poll()` method to retrieve new records from the Kafka broker.
+
+This method is now deprecated in favor of a new method called `poll(Duration)`, which has slightly different behavior. The `poll(Duration)` method still retrieves records from the Kafka broker, but it takes a Duration object as an argument instead of a long. This allows the timeout to be specified in other time units besides milliseconds.
+
+In addition to the change in argument type, the `poll(Duration)` method has slightly different behavior when it comes to how it waits for metadata from the Kafka broker. The `poll(long)` method would block for as long as it took to get the needed metadata, even if this was longer than the specified timeout duration. The poll(Duration) method, on the other hand, will adhere to the specified timeout duration and not wait for metadata if it takes longer than the timeout.
+
+## Thread Safety
+You can’t have multiple consumers that belong to the same group in one thread, and you can’t have multiple threads safely use the same consumer. One consumer per thread is the rule. To run multiple consumers in the same group in one application, you will need to run each in its own thread. It is useful to wrap the consumer logic in its own object and then use Java’s ExecutorService to start multiple threads, each with its own consumer.
+
+## Configuring Consumers
+So far we have focused on learning the Consumer API, but we’ve only looked at a few of the configuration properties—just the mandatory bootstrap.servers, group.id, key.deserializer, and value.deserializer.  Most of the parameters have rea‐ sonable defaults and do not require modification, but some have implications on the performance and availability of the consumers. Let’s take a look at some of the more important properties.
+
+### fetch.min.bytes
+This property allows a consumer to specify the minimum amount of data that it wants to receive from the broker when fetching records, by default one byte. If a broker receives a request for records from a consumer but the new records amount to fewer bytes than fetch.min.bytes, the broker will wait until more messages are available before sending the records back to the consumer. This reduces the load on both the consumer and the broker, as they have to handle fewer back-and-forth mes‐ sages in cases where the topics don’t have much new activity. 
+
+### fetch.max.wait.ms
+By setting fetch.min.bytes, you tell Kafka to wait until it has enough data to send before responding to the consumer. fetch.max.wait.ms lets you control how long to wait. By default, Kafka will wait up to 500 ms. This results in up to 500 ms of extra latency in case there is not enough data flowing to the Kafka topic to satisfy the minimum amount of data to return. If you set fetch.max.wait.ms to 100 ms and fetch.min.bytes to 1 MB, Kafka will receive a fetch request from the consumer and will respond with data either when it has 1 MB of data to return or after 100 ms, whichever happens first.
+
+### fetch.max.bytes
+In Apache Kafka, the fetch.max.bytes configuration property specifies the maximum amount of data that the Kafka consumer can receive in a single fetch request from the Kafka broker.
+
+When the consumer sends a fetch request to the broker, it specifies the maximum amount of data it is willing to receive in the request. The broker will return as many records as it can, up to the maximum specified by the consumer. The fetch.max.bytes property determines the maximum amount of data that the consumer is willing to receive in a single fetch request. The default value of fetch.max.bytes is 50MB. If the consumer reaches the limit specified by the fetch.max.bytes configuration property while retrieving records from the Kafka broker, it will stop fetching more records until the next fetch request.
+
+For example, if the consumer sends a fetch request to the broker and the broker has more records available than the consumer is willing to receive (as specified by the fetch.max.bytes limit), the broker will return as many records as it can up to the limit, and the consumer will process those records. The consumer will then send another fetch request to the broker to retrieve any remaining records.
+
+### max.poll.records
+This property controls the maximum number of records that a single call to poll() will return.
+
+### max.partition.fetch.bytes
+This property controls the maximum number of bytes the server will return per parti‐ tion (1 MB by default). When KafkaConsumer.poll() returns ConsumerRecords, the record object will use at most max.partition.fetch.bytes per partition assigned to the consumer. Note that controlling memory usage using this configuration can be quite complex, as you have no control over how many partitions will be included in the broker response. Therefore, we highly recommend using fetch.max.bytes instead, unless you have special reasons to try and process similar amounts of data from each partition.
+
+### session.timeout.ms and heartbeat.interval.ms
+The amount of time a consumer can be out of contact with the brokers while still considered alive defaults to 10 seconds. If more than session.timeout.ms passes without the consumer sending a heartbeat to the group coordinator, it is considered dead and the group coordinator will trigger a rebalance of the consumer group to allocate partitions from the dead consumer to the other consumers in the group. This property is closely related to heartbeat.interval.ms, which controls how frequently the Kafka consumer will send a heartbeat to the group coordinator, whereas session.timeout.ms controls how long a consumer can go without sending a heartbeat. Therefore, those two properties are typically modified together—heartbeat. interval.ms must be lower than session.timeout.ms and is usually set to one-third of the timeout value. So if session.timeout.ms is 3 seconds, heartbeat. interval.ms should be 1 second. Setting session.timeout.ms lower than the default will allow consumer groups to detect and recover from failure sooner but may also cause unwanted rebalances. Setting session.timeout.ms higher will reduce the chance of accidental rebalance but also means it will take longer to detect a real failure.
+
+
+### max.poll.interval.ms
+This property lets you set the length of time during which the consumer can go without polling before it is considered dead. As mentioned earlier, heartbeats and ses‐ sion timeouts are the main mechanism by which Kafka detects dead consumers and takes their partitions away. However, we also mentioned that heartbeats are sent by a background thread. There is a possibility that the main thread consuming from Kafka is deadlocked, but the background thread is still sending heartbeats. This means that records from partitions owned by this consumer are not being processed. The easiest way to know whether the consumer is still processing records is to check whether it is asking for more records. However, the intervals between requests for more records are difficult to predict and depend on the amount of available data, the type of pro‐ cessing done by the consumer, and sometimes on the latency of additional services.  It has to be an interval large enough that it will very rarely be reached by a healthy consumer but low enough to avoid significant impact from a hanging consumer. The default value is 5 minutes. When the timeout is hit, the background thread will send a “leave group” request to let the broker know that the consumer is dead and the group must rebalance, and then stop sending heartbeats.
+
+### default.api.timeout.ms
+The default.api.timeout.ms property determines how long the consumer or producer will wait for a response from the Kafka broker before timing out and throwing an exception. This timeout applies to all consumer and producer API requests, such as fetch requests, produce requests, and metadata requests. This is the timeout that will apply to (almost) all API calls made by the consumer when you don’t specify an explicit timeout while calling the API. The default is 1 minute, and since it is higher than the request timeout default, it will include a retry when needed. 
+
+### request.timeout.ms
+This is the maximum amount of time the consumer will wait for a response from the broker. If the broker does not respond within this time, the client will assume the broker will not respond at all, close the connection, and attempt to reconnect. This configuration defaults to 30 seconds, and it is recommended not to lower it. It is important to leave the broker with enough time to process the request before giving up.
+
+### auto.offset.reset
+This property controls the behavior of the consumer when it starts reading a partition for which it doesn’t have a committed offset, or if the committed offset it has is inva‐ lid (usually because the consumer was down for so long that the record with that off‐ set was already aged out of the broker). The default is “latest,” which means that lacking a valid offset, the consumer will start reading from the newest records (records that were written after the consumer started running). The alternative is “earliest,” which means that lacking a valid offset, the consumer will read all the data in the partition, starting from the very beginning. Setting auto.offset.reset to none will cause an exception to be thrown when attempting to consume from an invalid offset.
+
+### partition.assignment.strategy
+We learned that partitions are assigned to consumers in a consumer group. A PartitionAssignor is a class that, given consumers and topics they subscribed to, decides which partitions will be assigned to which consumer. By default, Kafka has the following assignment strategies:
+- **Range**: Assigns to each consumer a consecutive subset of partitions from each topic it subscribes to. So if consumers C1 and C2 are subscribed to two topics, T1 and T2, and each of the topics has three partitions, then C1 will be assigned partitions 0 and 1 from topics T1 and T2, while C2 will be assigned partition 2 from those topics. Because each topic has an uneven number of partitions and the assignment is done for each topic independently, the first consumer ends up with more partitions than the second. This happens whenever Range assignment is used and the number of consumers does not divide the number of partitions in each topic neatly.
+- **RoundRobin**: Takes all the partitions from all subscribed topics and assigns them to consumers sequentially, one by one. If C1 and C2 described previously used RoundRobin assignment, C1 would have partitions 0 and 2 from topic T1, and partition 1 from topic T2. C2 would have partition 1 from topic T1, and partitions 0 and 2 from topic T2. In general, if all consumers are subscribed to the same topics (a very common scenario), RoundRobin assignment will end up with all consumers having the same number of partitions (or at most one partition difference).
+- **Sticky**: The Sticky Assignor has two goals: the first is to have an assignment that is as balanced as possible, and the second is that in case of a rebalance, it will leave as many assignments as possible in place, minimizing the overhead associated with moving partition assignments from one consumer to another. In the common case where all consumers are subscribed to the same topic, the initial assignment from the Sticky Assignor will be as balanced as that of the RoundRobin Assignor. Subsequent assignments will be just as balanced but will reduce the number of partition movements. In cases where consumers in the same group subscribe to different topics, the assignment achieved by Sticky Assignor is more balanced than that of the RoundRobin Assignor.
+- **Cooperative Sticky**: This assignment strategy is identical to that of the Sticky Assignor but supports cooperative rebalances in which consumers can continue consuming from the partitions that are not reassigned.
+
+### client.id 
+This can be any string, and will be used by the brokers to identify requests sent from the client, such as fetch requests. It is used in logging and metrics, and for quotas.
+
+### client.rack
+By default, consumers will fetch messages from the leader replica of each partition. However, when the cluster spans multiple datacenters or multiple cloud availability zones, there are advantages both in performance and in cost to fetching messages from a replica that is located in the same zone as the consumer. To enable fetching from the closest replica, you need to set the client.rack configuration and identify the zone in which the client is located. Then you can configure the brokers to replace the default replica.selector.class with org.apache.kafka.common.replica.Rack AwareReplicaSelector.
+You can also implement your own replica.selector.class with custom logic for choosing the best replica to consume from, based on client metadata and partition metadata.
+
+## Commits and Offsets
+We call the action of updating the current position in the partition an offset commit. Instead, consumers commit the last message they’ve successfully processed from a partition and implicitly assume that every message before the last was also success‐ fully processed.
+
+How does a consumer commit an offset? It sends a message to Kafka, which updates a special __consumer_offsets topic with the committed offset for each partition. As long as all your consumers are up, running, and churning away, this will have no impact. However, if a consumer crashes or a new consumer joins the consumer group, this will trigger a rebalance. After a rebalance, each consumer may be assigned a new set of partitions than the one it processed before. In order to know where to pick up the work, the consumer will read the latest committed offset of each partition and continue from there.
+
+If the committed offset is smaller than the offset of the last message the client pro‐ cessed, the messages between the last processed offset and the committed offset will be processed twice.
+
+![](img/img_4_6.png)
+
+If the committed offset is larger than the offset of the last message the client actually processed, all messages between the last processed offset and the committed offset will be missed by the consumer group.
+
+![](img/img_4_7.png)
+
+## Automatic Commit
+The easiest way to commit offsets is to allow the consumer to do it for you. If you configure `enable.auto.commit=true`, then every five seconds the consumer will commit the latest offset that your client received from `poll()`. The five-second interval is the default and is controlled by setting auto.commit.interval.ms. Just like everything else in the consumer, the automatic commits are driven by the poll loop. Whenever you poll, the consumer checks if it is time to commit, and if it is, it will commit the offsets it returned in the last poll. 
+
+Consider that, by default, automatic commits occur every five seconds. Suppose that we are three seconds after the most recent commit our consumer crashed. After the rebalancing, the surviving consumers will start consuming the partitions that were previously owned by the crashed broker. But they will start from the last offset com‐ mitted. In this case, the offset is three seconds old, so all the events that arrived in those three seconds will be processed twice. It is possible to configure the commit interval to commit more frequently and reduce the window in which records will be duplicated, but it is impossible to completely eliminate them.
+With autocommit enabled, when it is time to commit offsets, the next poll will commit the last offset returned by the previous poll. It doesn’t know which events were actually processed, so it is critical to always process all the events returned by `poll()` before calling `poll()` again. (Just like `poll()`, `close()` also commits offsets automatically.) This is usually not an issue, but pay attention when you handle exceptions or exit the poll loop prematurely. Automatic commits are convenient, but they don’t give developers enough control to avoid duplicate messages.
