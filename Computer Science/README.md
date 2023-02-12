@@ -1,0 +1,4 @@
+# What is CPU Throttling
+CPU Throttling is the process of reducing the speed (clock rate) of a central processing unit (CPU) in order to conserve energy and reduce heat. It helps prevent hardware damage and improve battery life on laptops, tablets and smartphones.
+
+In Kubernetes, CPU Throttling occurs when a pod's CPU usage exceeds its specified limits. Kubernetes will then limit the amount of CPU resources available to the pod, effectively slowing down the pod's processing. This can be accomplished by setting resource limits for the pod using the `resources` field in a pod specification, with the `limits.cpu` field specifying the maximum CPU usage allowed for the pod. When the pod exceeds this limit, Kubernetes will throttle the pod's CPU usage to ensure it stays within the specified limits.
