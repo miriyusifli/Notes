@@ -253,3 +253,47 @@ your business objects. Your business objects should not know about Spring.
 Instead, you can use Spring to inject dependencies into your Main component. It’s OK for Main to know about Spring since Main is the dirtiest, lowest-level component in the architecture. 
 
 When faced with a framework, try not to marry it right away. See if there aren’t ways to date it for a while before you take the plunge. Keep the framework behind an architectural boundary if at all possible, for as long as possible. Perhaps you can find a way to get the milk without buying the cow.
+
+# The missing chapter
+
+## Package by layer
+A layered architecture doesn’t scream anything about the business domain. Put the code for two layered architectures, from two very different business domains, side by side and they will likely look eerily similar: web, services, and repositories.
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.1.png)
+
+## Package by feature
+With this approach, as shown in Figure 34.2, we have the same interfaces and classes as before, but they are all placed into a single Java package rather than being split among three packages. We can now see that this code base has something to do with orders rather than the web, services, and repositories. I often see software development teams realize that they have problems with horizontal layering (“package by layer”) and switch to vertical layering (“package by feature”) instead. In my opinion, both are suboptimal. If you’ve read this book so far, you might be thinking that we can do much better— and you’re right.
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.2.png)
+
+## Ports and adapters
+As Uncle Bob has said, approaches such as “ports and adapters,” the “hexagonal architecture,” “boundaries, controllers, entities,” and so on aim to create architectures where business/domain-focused code is independent and separate from the technical implementation details such as frameworks and databases. To summarize, you often see such code bases being composed of an “inside” (domain) and an “outside” (infrastructure), as suggested in Figure 34.3.
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.3.png)
+
+The “inside” region contains all of the domain concepts, whereas the “outside” region contains the interactions with the outside world (e.g., UIs, databases, third-party integrations). The major rule here is that the “outside” depends on the “inside”—never the other way around. Figure 34.4 shows a version of how the “view orders” use case might be implemented. The `com.mycompany.myapp.domain` package here is the “inside,” and the other packages are the “outside.” Notice how the dependencies flow toward the “inside.” The keen-eyed reader will notice that the `OrdersRepository` from previous diagrams has been renamed to simply be `Orders`. This comes from the world of domain-driven design, where the advice is that the naming of everything on the “inside” should be stated in terms of the “ubiquitous domain language.” To put that another way, we talk about “orders” when we’re having a discussion about the domain, not the “orders repository.”
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.4.png)
+
+It’s also worth pointing out that this is a simplified version of what the UML class diagram might look like, because it’s missing things like interactors and objects to marshal the data across the dependency boundaries.
+
+## Package by Component
+It’s a hybrid approach to everything we’ve seen so far, with the goal of bundling all of the responsibilities related to a single coarse-grained component into a single Java package. It’s about taking a service-centric view of a software system, which is something we’re seeing with micro-service architectures as well. In the same way that ports and adapters treat the web as just another delivery mechanism, “package by component” keeps the user interface separate from these coarse-grained components. 
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.6.png)
+
+A key benefit of the “package by component” approach is that if you’re writing code that needs to do something with orders, there’s just one place to go—the OrdersComponent. Inside the component, the separation of concerns is still maintained, so the business logic is separate from data persistence, but that’s a component implementation detail that consumers don’t need to know about.
+
+## Organization versus Encapsulation
+Moving from left to right, in the “package by layer” approach, the OrdersService and OrdersRepository interfaces need to be public, because they have inbound dependencies from classes outside of their defining package. In contrast, the implementation classes (OrdersServiceImpl and JdbcOrdersRepository) can be made more restrictive (package protected). Nobody needs to know about them; they are an implementation detail.
+
+In the “package by feature” approach, the OrdersController provides the sole entry point into the package, so everything else can be made package protected. The big caveat here is that nothing else in the code base, outside of this package, can access information related to orders unless they go through the controller. This may or may not be desirable.
+
+In the ports and adapters approach, the OrdersService and Orders interfaces have inbound dependencies from other packages, so they need to be made public. Again, the implementation classes can be made package protected and dependency injected at runtime.
+
+Finally, in the “package by component” approach, the OrdersComponent interface has an inbound dependency from the controller, but everything else
+can be made package protected.
+
+![](/Books/Programming/Clean_Architecture/img/figure-34.7.png)
+![](/Books/Programming/Clean_Architecture/img/figure-34.8.png)
+
